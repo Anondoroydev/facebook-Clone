@@ -1,0 +1,155 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string", "format": "uri" },
+        "bio": { "type": "string" },
+        "status": { "type": "string", "enum": ["online", "offline", "away"] },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "friends": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email", "friends", "createdAt", "role"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "A social media post",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhoto": { "type": "string", "format": "uri" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "likes": { "type": "array", "items": { "type": "string" } },
+        "commentCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "authorName", "content", "likes", "commentCount", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a post",
+      "type": "object",
+      "properties": {
+        "postId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhoto": { "type": "string", "format": "uri" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["postId", "authorId", "authorName", "content", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A direct message between users",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["senderId", "receiverId", "content", "createdAt", "read"]
+    },
+    "FriendRequest": {
+      "title": "FriendRequest",
+      "description": "A request to connect as friends",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "receiverId", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification for a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["like", "comment", "friend_request", "message"] },
+        "fromId": { "type": "string" },
+        "fromName": { "type": "string" },
+        "postId": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "fromId", "fromName", "read", "createdAt"]
+    },
+    "Call": {
+      "title": "Call",
+      "description": "A real-time call session",
+      "type": "object",
+      "properties": {
+        "callerId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "type": { "type": "string", "enum": ["audio", "video"] },
+        "status": { "type": "string", "enum": ["ringing", "accepted", "rejected", "ended"] },
+        "offer": { "type": "object" },
+        "answer": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["callerId", "receiverId", "type", "status", "createdAt"]
+    },
+    "IceCandidate": {
+      "title": "IceCandidate",
+      "description": "WebRTC ICE candidate",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "candidate": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "candidate", "createdAt"]
+    },
+    "TypingStatus": {
+      "title": "TypingStatus",
+      "description": "Real-time typing indicator",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "isTyping": { "type": "boolean" },
+        "typingTo": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "isTyping", "typingTo", "updatedAt"]
+    },
+    "Story": {
+      "title": "Story",
+      "description": "A 24-hour story",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string", "format": "uri" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "object" },
+        "expiresAt": { "type": "object" }
+      },
+      "required": ["userId", "userName", "imageUrl", "createdAt", "expiresAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "UserProfile", "description": "User profiles" },
+    "/posts/{postId}": { "schema": "Post", "description": "Global feed posts" },
+    "/posts/{postId}/comments/{commentId}": { "schema": "Comment", "description": "Comments on specific posts" },
+    "/messages/{messageId}": { "schema": "Message", "description": "Direct messages" },
+    "/friendRequests/{requestId}": { "schema": "FriendRequest", "description": "Friendship requests" },
+    "/notifications/{notificationId}": { "schema": "Notification", "description": "User notifications" },
+    "/calls/{callId}": { "schema": "Call", "description": "Real-time calls" },
+    "/calls/{callId}/iceCandidates/{candidateId}": { "schema": "IceCandidate", "description": "WebRTC ICE candidates" },
+    "/typingStatus/{userId}": { "schema": "TypingStatus", "description": "Real-time typing indicators" },
+    "/stories/{storyId}": { "schema": "Story", "description": "User stories" }
+  }
+}

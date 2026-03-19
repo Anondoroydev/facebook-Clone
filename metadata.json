@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: SocialConnect",
+  "description": "A full-featured social media platform with real-time chat, posts, likes, comments, and friend management.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
