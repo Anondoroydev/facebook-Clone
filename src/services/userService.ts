@@ -160,8 +160,44 @@ export const userService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, pathUser);
     }
+  },
+
+  getSuggestions: async (userId: string, currentFriends: string[]) => {
+    const path = 'users';
+    try {
+      const q = query(collection(db, 'users'), limit(20));
+      const snapshot = await getDocs(q);
+      const allUsers = snapshot.docs.map(doc => doc.data() as UserProfile);
+      
+      // Filter out current user, current friends, and limit to 5
+      return allUsers
+        .filter(u => u.uid !== userId && !currentFriends.includes(u.uid))
+        .slice(0, 5);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+      return [];
+    }
+  },
+
+  getActiveFriends: (friendIds: string[], callback: (friends: UserProfile[]) => void) => {
+    if (!friendIds || friendIds.length === 0) {
+      callback([]);
+      return () => {};
+    }
+    
+    const q = query(
+      collection(db, 'users'), 
+      where('uid', 'in', friendIds.slice(0, 10)), // Firestore 'in' limit is 10
+      where('status', '==', 'online')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const activeFriends = snapshot.docs.map(doc => doc.data() as UserProfile);
+      callback(activeFriends);
+    });
   }
 };
+
 
 export const friendService = {
   sendRequest: async (senderId: string, senderName: string, receiverId: string) => {

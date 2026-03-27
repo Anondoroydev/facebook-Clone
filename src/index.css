@@ -1,1 +1,120 @@
 @import "tailwindcss";
+
+:root {
+  /* HSL Colors for better control */
+  --accent-h: 220;
+  --accent-s: 100%;
+  --accent-l: 60%;
+  
+  --brand-primary: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --brand-secondary: hsl(260, 80%, 65%);
+  --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  
+  --bg-main: #F8FAFC;
+  --bg-sidebar: rgba(255, 255, 255, 0.7);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-input: rgba(0, 0, 0, 0.04);
+  
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --divider: rgba(0, 0, 0, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  
+  --fb-blue: var(--brand-primary); /* Compatibility */
+  --fb-bg: var(--bg-main);
+  --fb-card: var(--bg-card);
+  --fb-text-primary: var(--text-primary);
+  --fb-text-secondary: var(--text-secondary);
+  --fb-hover: rgba(0, 0, 0, 0.03);
+  --fb-divider: var(--divider);
+  --fb-input-bg: var(--bg-input);
+}
+
+[data-theme='dark'] {
+  --bg-main: #020617;
+  --bg-sidebar: rgba(15, 23, 42, 0.7);
+  --bg-card: rgba(30, 41, 59, 0.8);
+  --bg-input: rgba(255, 255, 255, 0.06);
+  
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --divider: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --fb-hover: rgba(255, 255, 255, 0.06);
+}
+
+::selection {
+  background-color: var(--brand-primary);
+  color: white;
+}
+
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+}
+
+@layer components {
+  .glass-card {
+    background-color: var(--bg-card);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .premium-input {
+    background-color: var(--bg-input);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .premium-input:focus {
+    background-color: var(--bg-card);
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 4px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.1);
+  }
+
+  .premium-button {
+    background: var(--brand-gradient);
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.25);
+  }
+
+  .premium-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.35);
+    filter: brightness(1.1);
+  }
+
+  .premium-button:active {
+    transform: translateY(0);
+    filter: brightness(0.95);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+

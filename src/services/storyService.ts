@@ -73,6 +73,29 @@ export const storyService = {
     });
   },
 
+  getAllStories(callback: (stories: Story[]) => void) {
+    const path = 'stories';
+    const storiesRef = collection(db, 'stories');
+    const now = new Date();
+    
+    const q = query(
+      storiesRef, 
+      where('expiresAt', '>', Timestamp.fromDate(now)),
+      orderBy('expiresAt', 'asc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const stories = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Story[];
+      
+      callback(stories);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, path);
+    });
+  },
+
   async cleanupExpiredStories() {
     const path = 'stories';
     try {
@@ -86,5 +109,15 @@ export const storyService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, path);
     }
+  },
+
+  async deleteStory(storyId: string) {
+    const path = `stories/${storyId}`;
+    try {
+      await deleteDoc(doc(db, 'stories', storyId));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
   }
 };
+

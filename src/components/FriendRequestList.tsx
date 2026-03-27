@@ -26,11 +26,12 @@ export const FriendRequestList: React.FC<FriendRequestListProps> = ({ requests, 
 
   if (requests.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-8 text-center border border-gray-100 shadow-sm">
-        <Users size={48} className="mx-auto text-gray-200 mb-4" />
-        <p className="text-gray-500 font-medium">No pending friend requests</p>
+      <div className="bg-(--fb-card) rounded-xl p-8 text-center border border-(--fb-divider)/30 shadow-sm">
+        <Users size={48} className="mx-auto text-(--fb-text-secondary)/30 mb-4" />
+        <p className="text-(--fb-text-secondary) font-medium">No pending friend requests</p>
       </div>
     );
+
   }
 
   return (
@@ -105,7 +106,8 @@ const FriendRequestCard: React.FC<{ request: FriendRequest, onRespond: (id: stri
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="bg-(--fb-card) rounded-xl border border-(--fb-divider)/30 shadow-sm overflow-hidden">
+
       <div className="aspect-square bg-gray-100">
         {sender.photoURL ? (
           <img src={sender.photoURL} alt={sender.displayName} className="w-full h-full object-cover" />

@@ -19,8 +19,9 @@ import { CallModal } from './components/CallModal';
 import { ProfilePage } from './components/ProfilePage';
 import { CreateStoryModal } from './components/CreateStoryModal';
 import { StoryViewer } from './components/StoryViewer';
+import { AdminDashboard } from './components/AdminDashboard';
 import { storyService, Story } from './services/storyService';
-import { Loader2, Users, MessageSquare, Bell, User as UserIcon, Home, Trash2, Settings, Phone, Video, Play, Store, LayoutGrid, Plus } from 'lucide-react';
+import { Loader2, Users, MessageSquare, Bell, User as UserIcon, Home, Trash2, Settings, Phone, Video, Play, Store, LayoutGrid, Plus, ShieldAlert, Check, UserPlus } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -36,12 +37,30 @@ export default function App() {
   const [viewingStoryIndex, setViewingStoryIndex] = useState<number | null>(null);
   const [activeChat, setActiveChat] = useState<UserProfile | null>(null);
   const [friends, setFriends] = useState<UserProfile[]>([]);
+  const [activeFriends, setActiveFriends] = useState<UserProfile[]>([]);
+  const [suggestions, setSuggestions] = useState<UserProfile[]>([]);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [incomingCall, setIncomingCall] = useState<CallData | null>(null);
   const [activeCall, setActiveCall] = useState<{ otherUser: UserProfile; type: 'audio' | 'video'; isIncoming: boolean } | null>(null);
   const [viewingUser, setViewingUser] = useState<UserProfile | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+  );
   const isJustLoggedInRef = useRef(true);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
 
   const handleSendRequest = async (targetUserId: string, targetName: string) => {
     try {
@@ -163,7 +182,15 @@ export default function App() {
       const unsubscribeSent = friendService.getSentRequests(profile.uid, setSentRequests);
       const unsubscribeNotif = notificationService.getNotifications(profile.uid, setNotifications);
       const unsubscribeStories = storyService.getStories(profile.uid, profile.friends || [], setStories);
+      
+      // Fetch suggestions
+      userService.getSuggestions(profile.uid, profile.friends || []).then(setSuggestions);
+      
+      // Listen for active friends
+      const unsubscribeActive = userService.getActiveFriends(profile.friends || [], setActiveFriends);
+
       const unsubscribeCalls = callService.listenForCalls(profile.uid, (call) => {
+
         // If user is offline, don't show the call
         if (profile.status === 'offline' || isJustLoggedInRef.current) {
           console.log('User is offline or just logged in, ignoring incoming call:', call.id);
@@ -278,7 +305,9 @@ export default function App() {
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
+    <div className="min-h-screen bg-(--bg-main) pt-[72px] text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary)">
+
+
       <Navbar 
         user={profile} 
         onNavigate={handleNavigate} 
@@ -288,137 +317,163 @@ export default function App() {
         friends={friends}
         onMessage={(user) => setActiveChat(user)}
         onStartCall={(user, type) => setActiveCall({ otherUser: user, type, isIncoming: false })}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
-      <main className="w-full max-w-[1920px] mx-auto px-4 xl:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <main className="w-full max-w-[1920px] mx-auto px-4 xl:px-12 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Sidebar - Profile & Navigation */}
-        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-2 overflow-y-auto sticky top-20 h-[calc(100vh-5rem)] pr-2 scrollbar-hide">
+        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-3 overflow-y-auto sticky top-24 h-[calc(100vh-120px)] pr-4 scrollbar-hide glass-card !bg-(--bg-sidebar) p-4">
+
           {/* Profile Link */}
           <button 
             onClick={() => handleViewProfile(profile.uid)} 
-            className="w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors group"
+            className="w-full flex items-center gap-4 p-3 hover:bg-(--fb-hover) rounded-2xl transition-all duration-300 group glass-card border border-transparent hover:border-(--glass-border) shadow-sm"
           >
             {profile.photoURL ? (
-              <img src={profile.photoURL} alt={profile.displayName} className="w-9 h-9 rounded-full object-cover" />
+              <img src={profile.photoURL} alt={profile.displayName} className="w-11 h-11 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform" />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                <UserIcon size={20} />
+              <div className="w-11 h-11 rounded-xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary) border border-(--brand-primary)/20">
+                <UserIcon size={22} />
               </div>
             )}
-            <span className="font-semibold text-[15px] text-gray-900">{profile.displayName}</span>
+            <span className="font-black text-[15px] text-(--text-primary) tracking-tight">{profile.displayName}</span>
           </button>
+
+
 
           {/* Navigation Items */}
-          <button onClick={() => handleNavigate('home')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'home' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-blue-600">
-              <Home size={24} fill={activePage === 'home' ? 'currentColor' : 'none'} />
+          <button onClick={() => handleNavigate('home')} className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-300 group ${activePage === 'home' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
+            <div className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all ${activePage === 'home' ? 'bg-(--brand-gradient) text-white shadow-lg shadow-blue-500/20' : 'bg-(--bg-input) text-(--text-secondary) group-hover:bg-(--fb-hover)'}`}>
+              <Home size={22} fill={activePage === 'home' ? 'currentColor' : 'none'} />
             </div>
-            <span className="font-semibold text-[15px] text-gray-900">Feed</span>
+            <span className="font-black text-[15px] tracking-tight">News Feed</span>
           </button>
 
-          <button onClick={() => handleNavigate('friends')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'friends' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-blue-500">
-              <Users size={24} fill={activePage === 'friends' ? 'currentColor' : 'none'} />
+          <button onClick={() => handleNavigate('friends')} className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-300 group ${activePage === 'friends' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
+            <div className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all ${activePage === 'friends' ? 'bg-(--brand-gradient) text-white shadow-lg shadow-blue-500/30' : 'bg-(--bg-input) text-(--text-secondary) group-hover:bg-(--fb-hover)'}`}>
+              <Users size={22} fill={activePage === 'friends' ? 'currentColor' : 'none'} />
             </div>
-            <span className="font-semibold text-[15px] text-gray-900">Friends</span>
+            <span className="font-black text-[15px] tracking-tight">Friends</span>
           </button>
 
-          <button onClick={() => handleNavigate('groups')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'groups' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-blue-600">
-              <LayoutGrid size={24} fill={activePage === 'groups' ? 'currentColor' : 'none'} />
+          <button onClick={() => handleNavigate('messages')} className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-300 group ${activePage === 'messages' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
+            <div className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all ${activePage === 'messages' ? 'bg-(--brand-gradient) text-white shadow-lg shadow-blue-500/30' : 'bg-(--bg-input) text-(--text-secondary) group-hover:bg-(--fb-hover)'}`}>
+              <MessageSquare size={22} fill={activePage === 'messages' ? 'currentColor' : 'none'} />
             </div>
-            <span className="font-semibold text-[15px] text-gray-900">Groups</span>
+            <span className="font-black text-[15px] tracking-tight">Messenger</span>
           </button>
 
-          <button onClick={() => handleNavigate('marketplace')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'marketplace' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-blue-600">
-              <Store size={24} fill={activePage === 'marketplace' ? 'currentColor' : 'none'} />
-            </div>
-            <span className="font-semibold text-[15px] text-gray-900">Marketplace</span>
-          </button>
-
-          <button onClick={() => handleNavigate('video')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'video' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-blue-600">
-              <Play size={24} fill={activePage === 'video' ? 'currentColor' : 'none'} />
-            </div>
-            <span className="font-semibold text-[15px] text-gray-900">Video</span>
-          </button>
-
-          <button onClick={() => handleNavigate('messages')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'messages' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-blue-600">
-              <MessageSquare size={24} fill={activePage === 'messages' ? 'currentColor' : 'none'} />
-            </div>
-            <span className="font-semibold text-[15px] text-gray-900">Messenger</span>
-          </button>
-
-          <button onClick={() => handleNavigate('notifications')} className={`w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors ${activePage === 'notifications' ? 'bg-gray-200' : ''}`}>
-            <div className="w-9 h-9 flex items-center justify-center text-red-500">
-              <Bell size={24} fill={activePage === 'notifications' ? 'currentColor' : 'none'} />
-            </div>
-            <span className="font-semibold text-[15px] text-gray-900">Notifications</span>
-          </button>
-
-          <div className="h-px bg-gray-300 my-2 mx-2" />
+          <div className="h-px bg-(--divider)/30 my-4 mx-4" />
 
           <button 
             onClick={() => setShowEditProfile(true)}
-            className="w-full flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-700"
+            className="w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-300 group text-(--text-secondary) hover:bg-(--fb-hover) hover:text-(--text-primary)"
           >
-            <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center">
-              <Settings size={20} />
+            <div className="w-11 h-11 bg-(--bg-input) rounded-xl flex items-center justify-center group-hover:bg-(--fb-hover) transition-colors shadow-sm">
+              <Settings size={22} />
             </div>
-            <span className="font-semibold text-[15px]">Settings</span>
+            <span className="font-black text-[15px] tracking-tight">Settings</span>
           </button>
+
+          {profile?.role === 'admin' && (
+            <button 
+              onClick={() => setShowAdminDashboard(true)}
+              className="w-full flex items-center gap-4 p-3 rounded-2xl transition-all duration-300 group text-red-500/80 hover:text-red-500 hover:bg-red-500/10"
+            >
+              <div className="w-11 h-11 bg-red-500/10 rounded-xl flex items-center justify-center group-hover:bg-red-500/20 transition-colors shadow-sm">
+                <ShieldAlert size={22} />
+              </div>
+              <span className="font-black text-[15px] tracking-tight">System Controls</span>
+            </button>
+          )}
+
         </div>
 
         {/* Main Content Area */}
-        <div className="lg:col-span-9 xl:col-span-9 space-y-6 max-w-[900px] w-full mx-auto">
+        <div className="lg:col-span-6 xl:col-span-6 space-y-6 w-full mx-auto">
+          {/* ... existing content ... */}
           {activePage === 'home' && (
             <>
               {/* Stories Section */}
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
+                {/* Create Story Card */}
                 <div 
                   onClick={() => setShowCreateStory(true)}
-                  className="flex-shrink-0 w-28 h-48 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group cursor-pointer"
+                  className="flex-shrink-0 w-[140px] h-[240px] glass-card overflow-hidden relative group cursor-pointer border border-(--glass-border) bg-black"
                 >
-                  <img src={profile.photoURL || 'https://picsum.photos/seed/user/200/300'} alt="Your Story" className="w-full h-3/4 object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-white flex flex-col items-center justify-center">
-                    <div className="w-8 h-8 bg-[#1877F2] rounded-full border-4 border-white flex items-center justify-center text-white -mt-8 z-10">
-                      <Plus size={20} strokeWidth={3} />
+                  <div className="h-[180px] overflow-hidden flex items-center justify-center bg-black/40">
+                    <img src={profile.photoURL || 'https://picsum.photos/seed/user/400/600'} alt="Your Story" className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out" />
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-(--bg-card) flex flex-col items-center justify-center pt-5">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-(--brand-gradient) rounded-2xl border-4 border-(--bg-card) flex items-center justify-center text-white z-10 shadow-lg shadow-blue-500/40">
+                      <Plus size={24} strokeWidth={3} />
                     </div>
-                    <span className="text-[11px] font-bold text-gray-900 mt-1">Create story</span>
+                    <span className="text-[13px] font-bold text-(--text-primary)">Create Story</span>
                   </div>
                 </div>
+
+
                 
+                {/* User Stories */}
                 {stories.map((story, index) => (
                   <div 
                     key={story.id} 
                     onClick={() => setViewingStoryIndex(index)}
-                    className="flex-shrink-0 w-28 h-48 bg-gray-200 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group cursor-pointer"
+                    className="flex-shrink-0 w-32 h-56 bg-black rounded-2xl overflow-hidden relative group cursor-pointer border border-(--glass-border) shadow-xl shadow-black/20"
                   >
-                    <img src={story.imageUrl} alt={story.userName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div className="absolute top-2 left-2 w-8 h-8 rounded-full border-2 border-[#1877F2] overflow-hidden bg-white">
+                    {/* Blurred Background */}
+                    <div 
+                      className="absolute inset-0 opacity-40 blur-2xl scale-110"
+                      style={{ 
+                        backgroundImage: `url(${story.imageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    />
+                    
+                    <div className="w-full h-full relative z-10 flex items-center justify-center p-1">
+                      <img 
+                        src={story.imageUrl} 
+                        alt={story.userName} 
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-in-out" 
+                      />
+                    </div>
+                    
+                    {/* Story Profile Pic */}
+                    <div className="absolute top-3 left-3 w-10 h-10 rounded-full border-4 border-(--brand-primary) overflow-hidden bg-(--bg-card) z-20 shadow-lg">
+
+
                       {story.userPhoto ? (
                         <img src={story.userPhoto} alt={story.userName} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-blue-600 bg-blue-50">
-                          <UserIcon size={14} />
+                        <div className="w-full h-full flex items-center justify-center text-(--brand-primary) bg-(--fb-hover)">
+                          <UserIcon size={18} />
                         </div>
                       )}
                     </div>
-                    <div className="absolute bottom-2 left-2 right-2">
-                      <span className="text-white text-[11px] font-bold drop-shadow-md truncate block">{story.userName}</span>
+
+                    
+                    {/* Story Author Name */}
+                    <div className="absolute bottom-3 left-3 right-3 z-10">
+                      <span className="text-white text-[13px] font-semibold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] truncate block">
+                        {story.userName}
+                      </span>
                     </div>
-                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                    
+                    {/* Overlay for better text readability */}
+                    <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/40 group-hover:from-black/10 group-hover:to-black/30 transition-colors" />
                   </div>
                 ))}
 
                 {stories.length === 0 && [1, 2, 3].map((i) => (
-                  <div key={i} className="flex-shrink-0 w-28 h-48 bg-gray-100 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative animate-pulse">
+                  <div key={i} className="flex-shrink-0 w-[112px] h-[200px] bg-gray-100 rounded-xl shadow-sm border border-[#CED0D4]/30 overflow-hidden relative animate-pulse">
                     <div className="w-full h-full bg-gray-200" />
                   </div>
                 ))}
               </div>
+
 
               {/* People You May Know (Friend Suggestions) */}
               {/* Removed as per user request */}
@@ -602,6 +657,83 @@ export default function App() {
           )}
         </div>
 
+        {/* Right Sidebar - Active & Suggestions */}
+        <div className="hidden xl:block xl:col-span-3 space-y-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pr-4 scrollbar-hide">
+          {/* Active Friends */}
+          <div className="glass-card p-5 border border-(--glass-border) shadow-xl shadow-black/5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-sm uppercase tracking-widest text-(--text-secondary)">Active Folks</h3>
+              <div className="flex gap-1">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              {activeFriends.map(friend => (
+                <button 
+                  key={friend.uid}
+                  onClick={() => {
+                    setActiveChat(friend);
+                    setActivePage('messages');
+                  }}
+                  className="w-full flex items-center gap-3 p-2 hover:bg-(--fb-hover) rounded-xl transition-all duration-300 group"
+                >
+                  <div className="relative">
+                    {friend.photoURL ? (
+                      <img src={friend.photoURL} alt="" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
+                        <UserIcon size={20} />
+                      </div>
+                    )}
+                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-(--bg-card) rounded-full" />
+                  </div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="font-black text-[14px] text-(--text-primary) truncate tracking-tight">{friend.displayName}</p>
+                    <p className="text-[11px] font-bold text-green-500 uppercase tracking-tighter">Online Now</p>
+                  </div>
+                </button>
+              ))}
+              {activeFriends.length === 0 && (
+                <p className="text-center py-4 text-xs font-bold text-(--text-secondary) opacity-50 uppercase tracking-widest">No folks active</p>
+              )}
+            </div>
+          </div>
+
+          {/* User Suggestions */}
+          <div className="glass-card p-5 border border-(--glass-border) shadow-xl shadow-black/5">
+             <h3 className="font-black text-sm uppercase tracking-widest text-(--text-secondary) mb-4">You Might Know</h3>
+             <div className="space-y-4">
+               {suggestions.map(suggested => (
+                 <div key={suggested.uid} className="flex items-center gap-3">
+                   {suggested.photoURL ? (
+                      <img src={suggested.photoURL} alt="" className="w-10 h-10 rounded-xl object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-(--fb-hover) flex items-center justify-center text-(--text-secondary)">
+                        <UserIcon size={20} />
+                      </div>
+                    )}
+                    <div className="flex-1 text-left min-w-0">
+                      <p className="font-black text-[14px] text-(--text-primary) truncate tracking-tight mb-1">{suggested.displayName}</p>
+                      <button 
+                        onClick={() => handleSendRequest(suggested.uid, suggested.displayName)}
+                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-(--brand-primary)/10 text-(--brand-primary) hover:bg-(--brand-primary) hover:text-white rounded-lg transition-all duration-300 w-full"
+                      >
+                        {sentRequests.some(r => r.receiverId === suggested.uid) ? (
+                          <><Check size={14} /><span className="text-[11px] font-black uppercase">Sent</span></>
+                        ) : (
+                          <><UserPlus size={14} /><span className="text-[11px] font-black uppercase">Add</span></>
+                        )}
+                      </button>
+                    </div>
+                 </div>
+               ))}
+               {suggestions.length === 0 && (
+                 <p className="text-center py-2 text-xs font-bold text-(--text-secondary) opacity-50 uppercase tracking-widest">Finding matches...</p>
+               )}
+             </div>
+          </div>
+        </div>
+
         {/* Modals */}
         {showEditProfile && (
           <EditProfile 
@@ -610,6 +742,14 @@ export default function App() {
             onUpdate={(updated) => setProfile(updated)} 
           />
         )}
+
+        {showAdminDashboard && (
+          <AdminDashboard 
+            onClose={() => setShowAdminDashboard(false)}
+            onViewProfile={handleViewProfile}
+          />
+        )}
+
 
         {showCreateStory && (
           <CreateStoryModal 
@@ -622,9 +762,11 @@ export default function App() {
           <StoryViewer 
             stories={stories}
             initialIndex={viewingStoryIndex}
+            currentUser={profile!}
             onClose={() => setViewingStoryIndex(null)}
           />
         )}
+
 
         {activeCall && (
           <CallModal
@@ -640,37 +782,8 @@ export default function App() {
           />
         )}
 
-        {/* Right Sidebar - Contacts & Suggestions */}
-        <div className="hidden lg:block lg:col-span-3 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <h3 className="font-bold text-gray-500 text-sm uppercase mb-4">Contacts</h3>
-            <div className="space-y-3">
-              {friends.map(friend => (
-                <button 
-                  key={friend.uid}
-                  onClick={() => setActiveChat(friend)}
-                  className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors group"
-                >
-                  <div className="relative">
-                    {friend.photoURL ? (
-                      <img src={friend.photoURL} alt={friend.displayName} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <UserIcon size={16} />
-                      </div>
-                    )}
-                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{friend.displayName}</span>
-                </button>
-              ))}
-              {friends.length === 0 && (
-                <p className="text-xs text-gray-400 italic">No friends yet. Add some!</p>
-              )}
-            </div>
-          </div>
-        </div>
       </main>
+
 
       {/* Floating Chat Windows */}
       {activeChat && activePage !== 'messages' && (

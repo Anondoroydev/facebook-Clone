@@ -40,7 +40,8 @@ export const UserSearch: React.FC<UserSearchProps> = ({ currentUser }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+    <div className="bg-(--fb-card) rounded-xl shadow-sm border border-(--fb-divider)/30 p-4 mb-6">
+
       <form onSubmit={handleSearch} className="flex gap-2">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />

@@ -16,6 +16,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
   const [inputText, setInputText] = useState('');
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
 
   useEffect(() => {
     console.log('ChatWindow useEffect called with:', { currentUserUid: currentUser.uid, otherUserUid: otherUser.uid });
@@ -72,7 +82,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
   };
 
   return (
-    <div className="fixed bottom-0 right-4 w-80 md:w-96 bg-white rounded-t-xl shadow-2xl border border-gray-200 flex flex-col h-[450px] z-[60]">
+    <div className="fixed bottom-0 right-4 w-80 md:w-96 bg-white rounded-t-xl shadow-2xl border border-gray-200 flex flex-col h-[450px] z-60">
+
       {/* Header */}
       <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-blue-600 text-white rounded-t-xl">
         <div className="flex items-center gap-2">
@@ -134,7 +145,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
             </div>
           );
         })}
+        <div ref={messagesEndRef} />
       </div>
+
 
       {/* Input */}
       <form onSubmit={handleSend} className="p-3 border-t border-gray-100 flex items-center gap-2">

@@ -13,13 +13,14 @@ export function EditProfile({ user, onClose, onUpdate }: EditProfileProps) {
   const [displayName, setDisplayName] = useState(user.displayName);
   const [bio, setBio] = useState(user.bio || '');
   const [photoURL, setPhotoURL] = useState(user.photoURL || '');
+  const [coverPhotoURL, setCoverPhotoURL] = useState(user.coverPhotoURL || '');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const updatedData = { displayName, bio, photoURL };
+      const updatedData = { displayName, bio, photoURL, coverPhotoURL };
       await userService.updateProfile(user.uid, updatedData);
       onUpdate({ ...user, ...updatedData });
       onClose();
@@ -40,7 +41,7 @@ export function EditProfile({ user, onClose, onUpdate }: EditProfileProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="flex flex-col items-center">
             <div className="relative group cursor-pointer">
               {photoURL ? (
@@ -50,16 +51,12 @@ export function EditProfile({ user, onClose, onUpdate }: EditProfileProps) {
                   <Camera size={32} />
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                <Camera size={24} className="text-white" />
-              </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">Click to change photo URL</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Display Name</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Display Name</label>
               <input
                 type="text"
                 value={displayName}
@@ -70,17 +67,17 @@ export function EditProfile({ user, onClose, onUpdate }: EditProfileProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Bio</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Bio</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none h-24"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none h-20"
                 placeholder="Tell us about yourself..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Photo URL</label>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Profile Photo URL</label>
               <input
                 type="url"
                 value={photoURL}
@@ -89,18 +86,30 @@ export function EditProfile({ user, onClose, onUpdate }: EditProfileProps) {
                 placeholder="https://example.com/photo.jpg"
               />
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Cover Photo URL</label>
+              <input
+                type="url"
+                value={coverPhotoURL}
+                onChange={(e) => setCoverPhotoURL(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                placeholder="https://example.com/cover.jpg"
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-4 shadow-lg shadow-blue-500/20"
           >
             {loading && <Loader2 className="animate-spin" size={20} />}
-            Save Changes
+            {loading ? 'Updating...' : 'Save Changes'}
           </button>
         </form>
       </div>
     </div>
+
   );
 }

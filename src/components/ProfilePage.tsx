@@ -150,10 +150,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Cover Photo Section */}
-      <div className="bg-white rounded-b-xl shadow-sm overflow-hidden border border-gray-200">
-        <div className="h-48 md:h-80 bg-gray-200 relative group">
+    <div className="max-w-[1280px] mx-auto bg-(--bg-main) min-h-screen transition-colors duration-500 pb-20">
+      {/* Cover Photo & Header Section */}
+      <div className="glass-card shadow-2xl shadow-black/5 rounded-b-[40px] overflow-hidden border-b border-(--glass-border) mb-8">
+
+        <div className="max-w-[1280px] mx-auto px-0 md:px-0">
+          <div className="h-[250px] md:h-[450px] bg-(--brand-gradient) relative group overflow-hidden">
+
+
           {user.coverPhotoURL ? (
             <img 
               src={user.coverPhotoURL} 
@@ -161,16 +165,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-400 to-blue-600" />
+            <div className="w-full h-full bg-linear-to-r from-[#1877F2]/20 to-[#1877F2]/40" />
+
           )}
           
           {isOwnProfile && (
             <div className="absolute bottom-4 right-4 flex gap-2">
               <button 
                 onClick={() => coverInputRef.current?.click()}
-                className="bg-white px-3 py-2 rounded-lg shadow-md flex items-center gap-2 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                className="bg-white px-3 py-2 rounded-lg shadow-md flex items-center gap-2 text-[15px] font-semibold hover:bg-[#F2F2F2] transition-colors text-[#050505]"
               >
-                <Camera size={18} /> {user.coverPhotoURL ? 'Edit Cover Photo' : 'Add Cover Photo'}
+                <Camera size={18} /> {user.coverPhotoURL ? 'Edit cover photo' : 'Add cover photo'}
               </button>
               <input 
                 type="file" 
@@ -182,12 +187,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
             </div>
           )}
         </div>
+      </div>
+
 
         {/* Profile Info Header */}
-        <div className="px-4 md:px-8 pb-4">
-          <div className="relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-12 md:-mt-16 mb-4">
-            <div className="relative group/profile">
-              <div className="w-32 h-32 md:w-42 md:h-42 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden flex items-center justify-center">
+        <div className="max-w-[1200px] mx-auto px-6 md:px-12 pb-8">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-24 relative z-10">
+            <div className="relative group/profile shrink-0">
+              <div className="w-[180px] h-[180px] rounded-full border-[6px] border-(--bg-sidebar) bg-(--bg-card) shadow-2xl overflow-hidden flex items-center justify-center backdrop-blur-xl">
+
                 {user.photoURL ? (
                   <img 
                     src={user.photoURL} 
@@ -195,10 +203,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                     className="w-full h-full object-cover" 
                   />
                 ) : (
-                  <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600">
-                    <UserIcon size={64} />
+                  <div className="w-full h-full bg-(--fb-hover) flex items-center justify-center text-(--fb-text-secondary)">
+                    <UserIcon size={80} />
                   </div>
                 )}
+
                 {isUploading && (
                   <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                     <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
@@ -211,13 +220,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Profile camera clicked');
                     profileInputRef.current?.click();
                   }}
-                  className="absolute bottom-2 right-2 bg-gray-200 p-2.5 rounded-full hover:bg-gray-300 transition-colors border-2 border-white shadow-md z-20 cursor-pointer"
+                  className="absolute bottom-3 right-3 bg-[#E4E6EB] p-2.5 rounded-full hover:bg-[#D8DADF] transition-colors border-2 border-white shadow-sm z-20 cursor-pointer"
                   title="Update profile picture"
                 >
-                  <Camera size={20} className="text-gray-700" />
+                  <Camera size={20} className="text-[#050505]" />
                 </button>
               )}
               <input 
@@ -226,13 +234,19 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                 onChange={handleProfilePhotoChange} 
                 accept="image/*" 
                 className="hidden" 
-                aria-hidden="true"
               />
             </div>
-            <div className="text-center md:text-left flex-1 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">{user.displayName}</h1>
-              <p className="text-gray-500 font-semibold">{(user.friends || []).length} friends</p>
-              <div className="flex -space-x-2 mt-2 justify-center md:justify-start">
+            
+            <div className="text-center md:text-left flex-1 pb-4">
+              <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-1">
+                <h1 className="text-[32px] font-black text-(--fb-text-primary) tracking-tight leading-tight">{user.displayName}</h1>
+                <p className="text-(--fb-text-secondary) font-bold text-[17px] hover:underline cursor-pointer">
+                  {(user.friends || []).length} friends
+                </p>
+              </div>
+
+              <div className="flex -space-x-1.5 mt-2 justify-center md:justify-start">
+
                 {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                   <img 
                     key={i} 
@@ -243,20 +257,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                 ))}
               </div>
             </div>
-            <div className="flex gap-2 mb-2">
+            
+            <div className="flex gap-2 pb-5">
               {isOwnProfile ? (
                 <>
                   <button 
                     onClick={onAddStory}
-                    className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    className="bg-[#1877F2] text-white px-3 py-2 rounded-md font-semibold hover:bg-[#166FE5] transition-colors flex items-center gap-2"
                   >
-                    <Plus size={20} /> Add to Story
+                    <Plus size={20} /> Add to story
                   </button>
                   <button 
                     onClick={onEditProfile}
-                    className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-colors flex items-center gap-2"
+                    className="bg-[#E4E6EB] text-[#050505] px-3 py-2 rounded-md font-semibold hover:bg-[#D8DADF] transition-colors flex items-center gap-2"
                   >
-                    <Edit2 size={18} /> Edit Profile
+                    <Edit2 size={18} /> Edit profile
+                  </button>
+                  <button className="bg-[#E4E6EB] text-[#050505] p-2 rounded-md font-bold hover:bg-[#D8DADF] transition-colors">
+                    <Settings size={20} strokeWidth={2.5} />
                   </button>
                 </>
               ) : (
@@ -264,13 +282,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                   {friendStatus === 'none' && (
                     <button 
                       onClick={handleAddFriend}
-                      className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      className="bg-[#1877F2] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#166FE5] transition-colors flex items-center gap-2"
                     >
                       <UserPlus size={20} /> Add Friend
                     </button>
                   )}
                   {friendStatus === 'pending_sent' && (
-                    <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold cursor-default flex items-center gap-2">
+                    <button className="bg-[#E4E6EB] text-[#050505] px-4 py-2 rounded-md font-semibold cursor-default flex items-center gap-2">
                       <UserCheck size={20} /> Request Sent
                     </button>
                   )}
@@ -278,68 +296,63 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                     <div className="flex gap-2">
                       <button 
                         onClick={handleAcceptRequest}
-                        className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                        className="bg-[#1877F2] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#166FE5] transition-colors"
                       >
                         Confirm
                       </button>
                       <button 
                         onClick={handleDeclineRequest}
-                        className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                        className="bg-[#E4E6EB] text-[#050505] px-4 py-2 rounded-md font-semibold hover:bg-[#D8DADF] transition-colors"
                       >
                         Delete
                       </button>
                     </div>
                   )}
                   {friendStatus === 'friends' && (
-                    <button 
-                      onClick={() => onMessage(user)}
-                      className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors flex items-center gap-2"
-                    >
-                      <MessageCircle size={20} /> Message
-                    </button>
+                    <div className="flex gap-2">
+                      <button className="bg-[#E4E6EB] text-[#050505] px-4 py-2 rounded-md font-semibold hover:bg-[#D8DADF] transition-colors flex items-center gap-2">
+                        <UserCheck size={20} /> Friends
+                      </button>
+                      <button 
+                        onClick={() => onMessage(user)}
+                        className="bg-[#1877F2] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#166FE5] transition-colors flex items-center gap-2"
+                      >
+                        <MessageCircle size={20} /> Message
+                      </button>
+                    </div>
                   )}
-                  
-                  <button 
-                    onClick={() => onMessage(user)}
-                    className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-colors flex items-center gap-2"
-                  >
-                    <MessageCircle size={18} /> Message
-                  </button>
-                  <button 
-                    onClick={() => onStartCall('audio')}
-                    className="bg-gray-200 text-gray-900 px-4 py-2 rounded-lg font-bold hover:bg-gray-300 transition-colors flex items-center gap-2"
-                  >
-                    <Phone size={18} /> Audio Call
-                  </button>
                 </>
               )}
-              <button className="bg-gray-200 text-gray-900 p-2 rounded-lg font-bold hover:bg-gray-300 transition-colors">
-                <MoreHorizontal size={20} />
-              </button>
             </div>
           </div>
 
-          <div className="h-px bg-gray-200 my-4" />
 
+          <div className="h-px bg-(--fb-divider) mx-4 md:mx-8" />
+          
           {/* Tabs */}
-          <div className="flex items-center gap-1 md:gap-4 overflow-x-auto scrollbar-hide">
-            {['posts', 'about', 'friends', 'photos', 'videos'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`px-4 py-3 text-[15px] font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === tab ? 'text-[#1877F2]' : 'text-gray-500 hover:bg-gray-100 rounded-lg'
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#1877F2] rounded-t-full" />
-                )}
-              </button>
-            ))}
+          <div className="max-w-[1200px] mx-auto px-6 md:px-12">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-2">
+              {['posts', 'about', 'friends', 'photos', 'videos', 'more'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => tab !== 'more' && setActiveTab(tab as any)}
+                  className={`px-6 py-3 text-[15px] font-bold transition-all duration-300 relative whitespace-nowrap rounded-xl ${
+                    activeTab === tab ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'
+                  }`}
+                >
+                  {tab === 'more' ? 'More \u25BE' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {activeTab === tab && (
+                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-(--brand-primary) rounded-full shadow-lg shadow-blue-500/20" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
+
+
         </div>
       </div>
+
 
       {/* Profile Content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
@@ -347,32 +360,34 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
         <div className="lg:col-span-5 space-y-4">
           {activeTab === 'posts' && (
             <>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Intro</h3>
-                {user.bio && <p className="text-center text-gray-800 mb-4">{user.bio}</p>}
+              <div className="glass-card p-6 shadow-xl shadow-black/5 animate-fade-in">
+                <h3 className="text-xl font-black text-(--text-primary) mb-6 tracking-tight">Intro</h3>
+
+                {user.bio && <p className="text-center text-(--fb-text-primary) mb-4">{user.bio}</p>}
                 {isOwnProfile && !user.bio && (
-                  <button className="w-full bg-gray-100 hover:bg-gray-200 py-2 rounded-lg font-semibold text-gray-700 transition-colors mb-4">
+                  <button className="w-full bg-(--fb-hover) hover:bg-(--fb-hover)/80 py-2 rounded-lg font-semibold text-(--fb-text-primary) transition-colors mb-4">
                     Add Bio
                   </button>
                 )}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <Briefcase className="text-gray-400" size={20} />
+                  <div className="flex items-center gap-3 text-(--fb-text-primary)">
+                    <Briefcase className="text-(--fb-text-secondary)" size={20} />
                     <span>Works at <strong>Self-Employed</strong></span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <GraduationCap className="text-gray-400" size={20} />
+                  <div className="flex items-center gap-3 text-(--fb-text-primary)">
+                    <GraduationCap className="text-(--fb-text-secondary)" size={20} />
                     <span>Studied at <strong>University of Life</strong></span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <MapPin className="text-gray-400" size={20} />
+                  <div className="flex items-center gap-3 text-(--fb-text-primary)">
+                    <MapPin className="text-(--fb-text-secondary)" size={20} />
                     <span>From <strong>Dhaka, Bangladesh</strong></span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <Heart className="text-gray-400" size={20} />
+                  <div className="flex items-center gap-3 text-(--fb-text-primary)">
+                    <Heart className="text-(--fb-text-secondary)" size={20} />
                     <span>Single</span>
                   </div>
                 </div>
+
                 {isOwnProfile && (
                   <button 
                     onClick={onEditProfile}
@@ -383,12 +398,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                 )}
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="bg-(--fb-card) rounded-xl shadow-sm border border-(--fb-divider)/30 p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">Photos</h3>
-                  <button onClick={() => setActiveTab('photos')} className="text-[#1877F2] hover:bg-blue-50 px-2 py-1 rounded-lg text-sm font-semibold">See all photos</button>
+                  <h3 className="text-xl font-bold text-(--fb-text-primary)">Photos</h3>
+                  <button onClick={() => setActiveTab('photos')} className="text-(--fb-blue) hover:bg-(--fb-blue)/10 px-2 py-1 rounded-lg text-sm font-semibold">See all photos</button>
                 </div>
                 <div className="grid grid-cols-3 gap-2 rounded-xl overflow-hidden">
+
                   {userPosts.filter(p => p.imageUrl).slice(0, 9).map((post, i) => (
                     <img 
                       key={post.id} 
@@ -417,17 +433,19 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
             <>
               {isOwnProfile && <CreatePost user={user} />}
               
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gray-900">Posts</h3>
+              <div className="bg-(--fb-card) rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.1)] p-4 flex items-center justify-between border border-(--fb-divider)/30">
+                <h3 className="text-xl font-bold text-(--fb-text-primary)">Posts</h3>
                 <div className="flex gap-2">
-                  <button className="bg-gray-100 p-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-semibold">
+                  <button className="bg-(--fb-hover) p-2 rounded-md text-(--fb-text-primary) hover:bg-(--fb-hover)/80 transition-colors flex items-center gap-2 text-[15px] font-semibold">
                     <List size={18} /> Filters
                   </button>
-                  <button className="bg-gray-100 p-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-semibold">
-                    <Settings size={18} /> Manage Posts
+                  <button className="bg-(--fb-hover) p-2 rounded-md text-(--fb-text-primary) hover:bg-(--fb-hover)/80 transition-colors flex items-center gap-2 text-[15px] font-semibold">
+                    <Settings size={18} /> Manage posts
                   </button>
                 </div>
               </div>
+
+
 
               <div className="space-y-4">
                 {userPosts.length > 0 ? (
@@ -440,27 +458,29 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                     />
                   ))
                 ) : (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center text-gray-500 italic">
+                  <div className="bg-(--fb-card) rounded-xl shadow-sm border border-(--fb-divider)/30 p-12 text-center text-(--fb-text-secondary) italic">
                     No posts yet.
                   </div>
+
                 )}
               </div>
             </>
           )}
 
           {activeTab === 'videos' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <div className="bg-(--fb-card) rounded-xl shadow-sm border border-(--fb-divider)/30 p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Videos</h3>
+                <h3 className="text-xl font-bold text-(--fb-text-primary)">Videos</h3>
                 {isOwnProfile && (
                   <button 
                     onClick={onAddStory}
-                    className="text-[#1877F2] hover:bg-blue-50 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5"
+                    className="text-(--fb-blue) hover:bg-(--fb-blue)/10 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5"
                   >
                     <Plus size={16} /> Add to Story
                   </button>
                 )}
               </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {userPosts.filter(p => p.videoUrl).map(post => (
                   <div key={post.id} className="relative aspect-video bg-black rounded-xl overflow-hidden group shadow-sm">
@@ -469,7 +489,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                       <Play className="text-white drop-shadow-lg" size={48} fill="white" />
                     </div>
                     {post.content && (
-                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-linear-to-t from-black/80 to-transparent">
+
                         <p className="text-white text-sm line-clamp-1">{post.content}</p>
                       </div>
                     )}
@@ -488,8 +509,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
           )}
 
           {activeTab === 'photos' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Photos</h3>
+            <div className="bg-(--fb-card) rounded-xl shadow-sm border border-(--fb-divider)/30 p-4">
+              <h3 className="text-xl font-bold text-(--fb-text-primary) mb-4">Photos</h3>
               <div className="grid grid-cols-3 gap-2">
                 {userPosts.filter(p => p.imageUrl).map(post => (
                   <img 
@@ -500,7 +521,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                   />
                 ))}
                 {userPosts.filter(p => p.imageUrl).length === 0 && (
-                  <div className="col-span-3 py-12 text-center text-gray-500 italic">
+                  <div className="col-span-3 py-12 text-center text-(--fb-text-secondary) italic">
                     No photos uploaded yet.
                   </div>
                 )}
@@ -508,28 +529,31 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
             </div>
           )}
 
+
           {activeTab === 'friends' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Friends</h3>
+            <div className="bg-(--fb-card) rounded-xl shadow-sm border border-(--fb-divider)/30 p-4">
+              <h3 className="text-xl font-bold text-(--fb-text-primary) mb-4">Friends</h3>
               <div className="grid grid-cols-2 gap-4">
+
                 {friendProfiles.map((friend) => (
                   <div 
                     key={friend.uid} 
                     onClick={() => onViewProfile(friend.uid)}
-                    className="flex items-center gap-3 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="flex items-center gap-3 p-3 border border-(--fb-divider)/30 rounded-xl hover:bg-(--fb-hover) cursor-pointer transition-colors"
                   >
                     {friend.photoURL ? (
                       <img src={friend.photoURL} className="w-16 h-16 rounded-lg object-cover" alt={friend.displayName} />
                     ) : (
-                      <div className="w-16 h-16 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                      <div className="w-16 h-16 rounded-lg bg-(--fb-hover) flex items-center justify-center text-(--fb-blue)">
                         <UserIcon size={32} />
                       </div>
                     )}
                     <div>
-                      <h4 className="font-bold text-gray-900">{friend.displayName}</h4>
-                      <p className="text-sm text-gray-500">Friend</p>
+                      <h4 className="font-bold text-(--fb-text-primary)">{friend.displayName}</h4>
+                      <p className="text-sm text-(--fb-text-secondary)">Friend</p>
                     </div>
                   </div>
+
                 ))}
                 {friendProfiles.length === 0 && (
                   <div className="col-span-2 py-12 text-center text-gray-500 italic">

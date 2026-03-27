@@ -15,8 +15,11 @@ import {
   Grid,
   Menu,
   X,
-  Loader2
+  Loader2,
+  Moon,
+  Sun
 } from 'lucide-react';
+
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { UserProfile } from '../types';
@@ -31,7 +34,10 @@ interface NavbarProps {
   friends: UserProfile[];
   onMessage: (user: UserProfile) => void;
   onStartCall?: (user: UserProfile, type: 'audio' | 'video') => void;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
 }
+
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   user, 
@@ -41,8 +47,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadNotifications = 0,
   friends,
   onMessage,
-  onStartCall
+  onStartCall,
+  theme,
+  onToggleTheme
 }) => {
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMessengerOpen, setIsMessengerOpen] = useState(false);
@@ -105,34 +114,35 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 px-4 h-14 flex items-center justify-between border-b border-gray-200">
+    <nav className="fixed top-0 left-0 right-0 h-18 glass-card rounded-none! border-b border-(--glass-border) z-50 px-6 flex items-center justify-between backdrop-blur-3xl shadow-xl shadow-black/5 transition-all duration-500">
+      
       {/* Left Section */}
-      <div className={`flex items-center gap-2 ${isSearchOpen ? 'flex-1' : 'flex-none md:flex-1'}`}>
+      <div className={`flex items-center gap-4 ${isSearchOpen ? 'flex-1' : 'flex-none md:flex-1'}`}>
         {!isSearchOpen && (
           <div 
-            className="w-10 h-10 bg-[#1877F2] rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors flex-shrink-0"
-            onClick={() => { onNavigate('home'); closeAllDropdowns(); }}
-          >
-            <span className="text-white text-3xl font-black italic -mb-1">f</span>
+            className="w-11 h-11 bg-(--brand-gradient) rounded-2xl flex items-center justify-center cursor-pointer shadow-lg shadow-blue-500/20 transform hover:scale-105 transition-all active:scale-95 shrink-0" 
+            onClick={() => { onNavigate("home"); closeAllDropdowns(); }} 
+          > 
+            <span className="text-white text-3xl font-black italic tracking-tighter">S</span> 
           </div>
         )}
         
-        <div ref={searchRef} className="relative w-full max-w-[240px]">
-          <div className={`flex items-center bg-gray-100 rounded-full px-3 py-2 gap-2 w-full ${isSearchOpen ? 'flex' : 'hidden sm:flex'} focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500`}>
-            {!isSearchOpen && <Search size={18} className="text-gray-500" />}
+        <div ref={searchRef} className="relative w-full max-w-[280px]">
+          <div className={`flex items-center bg-(--bg-input) rounded-2xl px-4 py-2.5 gap-3 w-full ${isSearchOpen ? "flex" : "hidden md:flex"} border border-transparent focus-within:border-(--brand-primary)/30 focus-within:bg-(--bg-card) focus-within:shadow-xl transition-all`}> 
+            {!isSearchOpen && <Search size={22} className="text-(--text-secondary)" />} 
             <input 
               type="text" 
-              placeholder="Search Facebook" 
-              className="bg-transparent border-none outline-none text-[15px] w-full placeholder:text-gray-500"
-              autoFocus={isSearchOpen}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+              placeholder="Search SocialConnect" 
+              className="bg-transparent border-none outline-none text-[15px] w-full placeholder:text-(--text-secondary) text-(--text-primary) font-medium" 
+              autoFocus={isSearchOpen} 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)} 
+            /> 
           </div>
 
           {/* Search Results Dropdown */}
           {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-[70] max-h-[400px] overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-3 glass-card shadow-2xl border border-(--glass-border) overflow-hidden z-70 max-h-[400px] overflow-y-auto animate-fade-in translate-y-0">
               {searchResults.map(result => (
                 <button
                   key={result.uid}
@@ -142,122 +152,60 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setSearchResults([]);
                     setIsSearchOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                  className="w-full flex items-center gap-3 p-4 hover:bg-(--fb-hover) transition-colors border-b border-(--divider)/30 last:border-0 text-left"
                 >
                   {result.photoURL ? (
-                    <img src={result.photoURL} alt={result.displayName} className="w-9 h-9 rounded-full object-cover" />
+                    <img src={result.photoURL} alt={result.displayName} className="w-10 h-10 rounded-xl object-cover" />
                   ) : (
-                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                      <UserIcon size={18} />
+                    <div className="w-10 h-10 rounded-xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
+                      <UserIcon size={20} />
                     </div>
                   )}
-                  <span className="font-semibold text-sm text-gray-900">{result.displayName}</span>
+                  <span className="font-bold text-[15px] text-(--text-primary)">{result.displayName}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
-        
-        {!isSearchOpen && (
-          <button 
-            onClick={() => setIsSearchOpen(true)}
-            className="sm:hidden p-2 bg-gray-100 rounded-full text-gray-600"
-          >
-            <Search size={20} />
-          </button>
-        )}
       </div>
 
       {/* Center Section - Desktop */}
-      <div className="hidden md:flex items-center justify-center flex-1 h-full max-w-[600px]">
+      <div className="hidden md:flex items-center justify-center flex-1 h-full max-w-[500px] gap-2">
         <button 
           onClick={() => { onNavigate('home'); closeAllDropdowns(); }}
-          className={`flex-1 h-[52px] flex items-center justify-center relative group transition-colors ${activePage === 'home' ? 'text-[#1877F2]' : 'text-[#65676B] hover:bg-gray-100 rounded-lg mx-1'}`}
+          className={`px-6 h-12 flex items-center justify-center relative group transition-all duration-300 rounded-2xl ${activePage === 'home' ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
           title="Home"
         >
-          <Home size={28} fill={activePage === 'home' ? 'currentColor' : 'none'} strokeWidth={activePage === 'home' ? 2.5 : 2} />
-          {activePage === 'home' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1877F2] rounded-t-full" />}
+          <Home size={24} fill={activePage === 'home' ? 'currentColor' : 'none'} />
+          {activePage === 'home' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-(--brand-primary) rounded-full shadow-lg shadow-blue-500/20" />}
         </button>
         <button 
           onClick={() => { onNavigate('friends'); closeAllDropdowns(); }}
-          className={`flex-1 h-[52px] flex items-center justify-center relative group transition-colors ${activePage === 'friends' ? 'text-[#1877F2]' : 'text-[#65676B] hover:bg-gray-100 rounded-lg mx-1'}`}
+          className={`px-6 h-12 flex items-center justify-center relative group transition-all duration-300 rounded-2xl ${activePage === 'friends' ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
           title="Friends"
         >
-          <Users size={28} fill={activePage === 'friends' ? 'currentColor' : 'none'} strokeWidth={activePage === 'friends' ? 2.5 : 2} />
-          {activePage === 'friends' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1877F2] rounded-t-full" />}
+          <Users size={24} fill={activePage === 'friends' ? 'currentColor' : 'none'} />
+          {activePage === 'friends' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-(--brand-primary) rounded-full shadow-lg shadow-blue-500/20" />}
         </button>
         <button 
           onClick={() => { onNavigate('video'); closeAllDropdowns(); }}
-          className={`flex-1 h-[52px] flex items-center justify-center relative group transition-colors ${activePage === 'video' ? 'text-[#1877F2]' : 'text-[#65676B] hover:bg-gray-100 rounded-lg mx-1'}`}
+          className={`px-6 h-12 flex items-center justify-center relative group transition-all duration-300 rounded-2xl ${activePage === 'video' ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
           title="Video"
         >
-          <Play size={28} fill={activePage === 'video' ? 'currentColor' : 'none'} />
-          {activePage === 'video' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1877F2] rounded-t-full" />}
-        </button>
-        <button 
-          onClick={() => { onNavigate('marketplace'); closeAllDropdowns(); }}
-          className={`flex-1 h-[52px] flex items-center justify-center relative group transition-colors ${activePage === 'marketplace' ? 'text-[#1877F2]' : 'text-[#65676B] hover:bg-gray-100 rounded-lg mx-1'}`}
-          title="Marketplace"
-        >
-          <Store size={28} fill={activePage === 'marketplace' ? 'currentColor' : 'none'} />
-          {activePage === 'marketplace' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1877F2] rounded-t-full" />}
-        </button>
-        <button 
-          onClick={() => { onNavigate('groups'); closeAllDropdowns(); }}
-          className={`flex-1 h-[52px] flex items-center justify-center relative group transition-colors ${activePage === 'groups' ? 'text-[#1877F2]' : 'text-[#65676B] hover:bg-gray-100 rounded-lg mx-1'}`}
-          title="Groups"
-        >
-          <LayoutGrid size={28} fill={activePage === 'groups' ? 'currentColor' : 'none'} />
-          {activePage === 'groups' && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1877F2] rounded-t-full" />}
+          <Play size={24} fill={activePage === 'video' ? 'currentColor' : 'none'} />
+          {activePage === 'video' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-(--brand-primary) rounded-full shadow-lg shadow-blue-500/20" />}
         </button>
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center justify-end gap-2 flex-1">
-        <div className="relative hidden lg:flex">
-          <button 
-            onClick={() => {
-              const newState = !isGridMenuOpen;
-              closeAllDropdowns();
-              setIsGridMenuOpen(newState);
-            }}
-            className={`p-2.5 rounded-full transition-colors ${isGridMenuOpen ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
-            title="Menu"
-          >
-            <Grid size={20} />
-          </button>
-          {isGridMenuOpen && (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-[60]">
-              <h3 className="text-2xl font-bold mb-4">Menu</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-3 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
-                  <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-1">
-                    <Users size={20} />
-                  </div>
-                  <span className="font-medium text-sm">Friends</span>
-                </div>
-                <div className="p-3 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
-                  <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-1">
-                    <LayoutGrid size={20} />
-                  </div>
-                  <span className="font-medium text-sm">Groups</span>
-                </div>
-                <div className="p-3 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
-                  <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-1">
-                    <Store size={20} />
-                  </div>
-                  <span className="font-medium text-sm">Marketplace</span>
-                </div>
-                <div className="p-3 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
-                  <div className="w-9 h-9 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-1">
-                    <Play size={20} />
-                  </div>
-                  <span className="font-medium text-sm">Video</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+      <div className="flex items-center justify-end gap-3 flex-1">
+        <button
+          onClick={onToggleTheme}
+          className="w-11 h-11 flex items-center justify-center rounded-xl bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover) transition-all duration-300"
+          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+        >
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
 
         <div className="relative">
           <button 
@@ -266,73 +214,48 @@ export const Navbar: React.FC<NavbarProps> = ({
               closeAllDropdowns();
               setIsMessengerOpen(newState);
             }}
-            className={`p-2.5 rounded-full transition-colors ${isMessengerOpen || activePage === 'messages' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
+            className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 ${isMessengerOpen || activePage === 'messages' ? 'bg-(--brand-primary)/20 text-(--brand-primary)' : 'bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover)'}`}
             title="Messenger"
           >
-            <MessageCircle size={20} />
+            <MessageCircle size={22} />
           </button>
+
           {isMessengerOpen && (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-[60]">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold">Chats</h3>
-                <button onClick={() => { onNavigate('messages'); setIsMessengerOpen(false); }} className="text-blue-600 text-sm hover:underline">See all in Messenger</button>
+            <div className="absolute top-full right-0 mt-3 w-85 glass-card shadow-2xl border border-(--glass-border) p-5 z-70 animate-fade-in">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-black text-(--text-primary) tracking-tight">Chats</h3>
+                <button onClick={() => { onNavigate('messages'); setIsMessengerOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {friends.slice(0, 5).map(friend => (
                   <div 
                     key={friend.uid}
-                    className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-4 p-3 hover:bg-(--fb-hover) rounded-2xl transition-all duration-300 cursor-pointer group"
+                    onClick={() => {
+                      onMessage(friend);
+                      setIsMessengerOpen(false);
+                    }}
                   >
                     <div className="relative">
                       {friend.photoURL ? (
-                        <img src={friend.photoURL} alt={friend.displayName} className="w-10 h-10 rounded-full object-cover" />
+                        <img src={friend.photoURL} alt={friend.displayName} className="w-11 h-11 rounded-full object-cover shadow-sm" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                          <UserIcon size={20} />
+                        <div className="w-11 h-11 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
+                          <UserIcon size={22} />
                         </div>
                       )}
                       {friend.status === 'online' && (
-                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-(--bg-card) rounded-full shadow-sm"></div>
                       )}
                     </div>
-                    <div 
-                      onClick={() => {
-                        onMessage(friend);
-                        setIsMessengerOpen(false);
-                      }}
-                      className="flex-1 text-left cursor-pointer"
-                    >
-                      <h4 className="font-bold text-sm text-gray-900">{friend.displayName}</h4>
-                      <p className="text-xs text-gray-500">Active now</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onStartCall?.(friend, 'audio');
-                          setIsMessengerOpen(false);
-                        }}
-                        className="p-1.5 hover:bg-gray-100 rounded-full text-blue-600 transition-colors"
-                        title="Audio Call"
-                      >
-                        <Phone size={16} />
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onStartCall?.(friend, 'video');
-                          setIsMessengerOpen(false);
-                        }}
-                        className="p-1.5 hover:bg-gray-100 rounded-full text-blue-600 transition-colors"
-                        title="Video Call"
-                      >
-                        <Video size={16} />
-                      </button>
+                    <div className="flex-1 text-left">
+                      <h4 className="font-bold text-[15px] text-(--text-primary) group-hover:text-(--brand-primary) transition-colors">{friend.displayName}</h4>
+                      <p className="text-xs text-(--text-secondary) font-medium">Active now</p>
                     </div>
                   </div>
                 ))}
                 {friends.length === 0 && (
-                  <div className="p-2 text-center text-gray-500 italic text-sm">No recent messages</div>
+                  <div className="py-8 text-center text-(--text-secondary) italic text-sm font-medium">No recent messages</div>
                 )}
               </div>
             </div>
@@ -346,105 +269,82 @@ export const Navbar: React.FC<NavbarProps> = ({
               closeAllDropdowns();
               setIsNotificationsOpen(newState);
             }}
-            className={`p-2.5 rounded-full transition-colors ${isNotificationsOpen || activePage === 'notifications' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`}
+            className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 ${isNotificationsOpen || activePage === 'notifications' ? 'bg-(--brand-primary)/20 text-(--brand-primary)' : 'bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover)'}`}
             title="Notifications"
           >
-            <Bell size={20} />
+            <Bell size={22} />
             {unreadNotifications > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-(--bg-card) font-black shadow-lg">
                 {unreadNotifications}
               </span>
             )}
           </button>
+
           {isNotificationsOpen && (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-[60]">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold">Notifications</h3>
-                <button onClick={() => { onNavigate('notifications'); setIsNotificationsOpen(false); }} className="text-blue-600 text-sm hover:underline">See all</button>
+            <div className="absolute top-full right-0 mt-3 w-85 glass-card shadow-2xl border border-(--glass-border) p-5 z-70 animate-fade-in">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-black text-(--text-primary) tracking-tight">Alerts</h3>
+                <button onClick={() => { onNavigate('notifications'); setIsNotificationsOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
               </div>
-              <div className="space-y-2">
-                <div className="p-2 text-center text-gray-500 italic text-sm">No new notifications</div>
-              </div>
+              <div className="py-8 text-center text-(--text-secondary) font-medium">No new notifications</div>
             </div>
           )}
         </div>
         
-        <div className="relative">
+        <div className="relative ml-2">
           <button 
             onClick={() => {
               const newState = !isProfileOpen;
               closeAllDropdowns();
               setIsProfileOpen(newState);
             }}
-            className="flex items-center gap-1 hover:bg-gray-100 p-0.5 rounded-full transition-colors"
+            className="flex items-center gap-1 hover:scale-105 active:scale-95 transition-all duration-300"
           >
             {user?.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+              <img src={user.photoURL} alt={user.displayName} className="w-11 h-11 rounded-2xl object-cover border-2 border-(--brand-primary)/20 shadow-lg shadow-black/5" />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 border border-gray-200">
-                <UserIcon size={20} />
+              <div className="w-11 h-11 rounded-2xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary) border-2 border-(--brand-primary)/20 shadow-lg shadow-black/5">
+                <UserIcon size={22} />
               </div>
             )}
           </button>
 
           {isProfileOpen && (
-            <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 p-2 z-[60]">
+            <div className="absolute top-full right-0 mt-3 w-75 glass-card shadow-2xl border border-(--glass-border) p-3 z-70 animate-fade-in">
               <div 
                 onClick={() => { onNavigate('profile'); setIsProfileOpen(false); }}
-                className="p-2 hover:bg-gray-50 rounded-lg cursor-pointer flex items-center gap-3 mb-2"
+                className="p-3 hover:bg-(--fb-hover) rounded-2xl cursor-pointer flex items-center gap-4 transition-all duration-300 group"
               >
                 {user?.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} className="w-12 h-12 rounded-full object-cover" />
+                  <img src={user.photoURL} alt={user.displayName} className="w-14 h-14 rounded-2xl object-cover shadow-sm" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                    <UserIcon size={24} />
+                  <div className="w-14 h-14 rounded-2xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
+                    <UserIcon size={28} />
                   </div>
                 )}
                 <div className="flex-1">
-                  <h4 className="font-bold text-gray-900">{user?.displayName}</h4>
-                  <p className="text-sm text-gray-500">See your profile</p>
+                  <h4 className="font-black text-(--text-primary) group-hover:text-(--brand-primary) transition-colors tracking-tight">{user?.displayName}</h4>
+                  <p className="text-xs text-(--text-secondary) font-medium">See your profile</p>
                 </div>
               </div>
-              <div className="h-px bg-gray-200 my-2" />
               
-              {/* Status Toggle */}
-              <div className="px-2 py-1">
-                <div className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${user?.status === 'online' ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-600'}`}>
-                      <div className={`w-3 h-3 rounded-full ${user?.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
-                    </div>
-                    <span className="font-medium text-gray-700">Status: <span className="capitalize">{user?.status || 'online'}</span></span>
-                  </div>
-                  <button 
-                    onClick={async () => {
-                      if (!user) return;
-                      const newStatus = user.status === 'online' ? 'offline' : 'online';
-                      await userService.updateProfile(user.uid, { status: newStatus });
-                    }}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${user?.status === 'online' ? 'bg-blue-600' : 'bg-gray-300'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${user?.status === 'online' ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="h-px bg-gray-200 my-2" />
+              <div className="h-px bg-(--divider)/30 my-3 mx-2" />
+              
               <button 
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors"
+                className="w-full flex items-center gap-4 p-3 hover:bg-red-500/10 rounded-2xl text-(--text-primary) hover:text-red-500 transition-all duration-300 group"
               >
-                <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center">
-                  <LogOut size={20} />
+                <div className="w-10 h-10 bg-(--bg-input) rounded-xl flex items-center justify-center group-hover:bg-red-500/10 transition-colors">
+                  <LogOut size={22} />
                 </div>
-                <span className="font-medium">Log Out</span>
+                <span className="font-bold text-[15px]">Sign Out</span>
               </button>
             </div>
           )}
         </div>
 
         <button 
-          className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+          className="md:hidden w-11 h-11 flex items-center justify-center bg-(--bg-input) rounded-xl text-(--text-primary) hover:bg-(--fb-hover) transition-all"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -453,66 +353,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 md:hidden p-4 flex flex-col gap-2 shadow-xl animate-in slide-in-from-top duration-200">
-          <button onClick={() => { onNavigate('home'); setIsMenuOpen(false); }} className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activePage === 'home' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
-            <Home size={24} /> <span className="font-medium">Home</span>
+        <div className="absolute top-full left-0 right-0 glass-card mx-6 mt-3 p-4 flex flex-col gap-2 shadow-2xl animate-in slide-in-from-top-4 duration-300 md:hidden z-60">
+          <button onClick={() => { onNavigate('home'); setIsMenuOpen(false); }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${activePage === 'home' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
+            <Home size={24} /> <span className="font-bold">Home</span>
           </button>
-          <button onClick={() => { onNavigate('friends'); setIsMenuOpen(false); }} className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activePage === 'friends' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
-            <Users size={24} /> <span className="font-medium">Friends</span>
-          </button>
-          <button onClick={() => { onNavigate('messages'); setIsMenuOpen(false); }} className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activePage === 'messages' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
-            <MessageCircle size={24} /> <span className="font-medium">Messages</span>
-          </button>
-          <button onClick={() => { onNavigate('notifications'); setIsMenuOpen(false); }} className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${activePage === 'notifications' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}>
-            <Bell size={24} /> <span className="font-medium">Notifications</span>
+          <button onClick={() => { onNavigate('friends'); setIsMenuOpen(false); }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${activePage === 'friends' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
+            <Users size={24} /> <span className="font-bold">Friends</span>
           </button>
         </div>
       )}
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden flex items-center justify-around h-12 z-50">
-        <button 
-          onClick={() => onNavigate('home')}
-          className={`flex-1 flex flex-col items-center justify-center ${activePage === 'home' ? 'text-[#1877F2]' : 'text-gray-500'}`}
-        >
-          <Home size={24} fill={activePage === 'home' ? 'currentColor' : 'none'} />
-        </button>
-        <button 
-          onClick={() => onNavigate('friends')}
-          className={`flex-1 flex flex-col items-center justify-center ${activePage === 'friends' ? 'text-[#1877F2]' : 'text-gray-500'}`}
-        >
-          <Users size={24} fill={activePage === 'friends' ? 'currentColor' : 'none'} />
-        </button>
-        <button 
-          onClick={() => onNavigate('video')}
-          className={`flex-1 flex flex-col items-center justify-center ${activePage === 'video' ? 'text-[#1877F2]' : 'text-gray-500'}`}
-        >
-          <Play size={24} fill={activePage === 'video' ? 'currentColor' : 'none'} />
-        </button>
-        <button 
-          onClick={() => onNavigate('marketplace')}
-          className={`flex-1 flex flex-col items-center justify-center ${activePage === 'marketplace' ? 'text-[#1877F2]' : 'text-gray-500'}`}
-        >
-          <Store size={24} fill={activePage === 'marketplace' ? 'currentColor' : 'none'} />
-        </button>
-        <button 
-          onClick={() => onNavigate('notifications')}
-          className={`flex-1 flex flex-col items-center justify-center relative ${activePage === 'notifications' ? 'text-[#1877F2]' : 'text-gray-500'}`}
-        >
-          <Bell size={24} fill={activePage === 'notifications' ? 'currentColor' : 'none'} />
-          {unreadNotifications > 0 && (
-            <span className="absolute top-1 right-1/4 bg-red-500 text-white text-[8px] w-4 h-4 flex items-center justify-center rounded-full border border-white">
-              {unreadNotifications}
-            </span>
-          )}
-        </button>
-        <button 
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className={`flex-1 flex flex-col items-center justify-center ${isMenuOpen ? 'text-[#1877F2]' : 'text-gray-500'}`}
-        >
-          <Menu size={24} />
-        </button>
-      </div>
     </nav>
   );
 };
-

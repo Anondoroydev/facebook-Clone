@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, User as UserIcon } from 'lucide-react';
-import { Story } from '../services/storyService';
+import { Story, storyService } from '../services/storyService';
+import { Trash2, Loader2, X, ChevronLeft, ChevronRight, User as UserIcon } from 'lucide-react';
+import { UserProfile } from '../types';
+
 
 interface StoryViewerProps {
   stories: Story[];
   initialIndex: number;
+  currentUser: UserProfile;
   onClose: () => void;
 }
 
-export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialIndex, onClose }) => {
+export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialIndex, currentUser, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const story = stories[currentIndex];
 
@@ -77,17 +81,55 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialIndex,
               <p className="text-[10px] opacity-90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">24h Story</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
-            <X size={24} />
-          </button>
+          <div className="flex items-center gap-2">
+            {(story.userId === currentUser.uid || currentUser.role === 'admin') && (
+              <button 
+                onClick={async () => {
+                  if (window.confirm('Delete this story?')) {
+                    setIsDeleting(true);
+                    try {
+                      await storyService.deleteStory(story.id);
+                      if (stories.length === 1) {
+                        onClose();
+                      } else {
+                        handleNext();
+                      }
+                    } catch (error) {
+                      console.error('Error deleting story:', error);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }
+                }}
+                disabled={isDeleting}
+                className="p-2 text-white hover:bg-red-500/20 hover:text-red-400 rounded-full transition-all"
+                title="Delete Story"
+              >
+                {isDeleting ? <Loader2 size={20} className="animate-spin" /> : <Trash2 size={20} />}
+              </button>
+            )}
+            <button onClick={onClose} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Story Content */}
-        <div className="flex-1 relative flex items-center justify-center">
+        <div className="flex-1 relative flex items-center justify-center bg-black overflow-hidden">
+          {/* Blurred Background for "Full" feel */}
+          <div 
+            className="absolute inset-0 opacity-50 blur-3xl scale-110"
+            style={{ 
+              backgroundImage: `url(${story.imageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          />
+
           {story.type === 'video' || story.imageUrl.match(/\.(mp4|webm|ogg)$/) || story.imageUrl.includes('video') ? (
             <video 
               src={story.imageUrl} 
-              className="w-full h-full object-contain"
+              className="relative z-10 w-full h-full object-contain"
               autoPlay
               muted
               playsInline
@@ -97,9 +139,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialIndex,
             <img 
               src={story.imageUrl} 
               alt="Story" 
-              className="w-full h-full object-contain"
+              className="relative z-10 w-full h-full object-contain"
             />
           )}
+
           
           {/* Navigation Controls */}
           <button 

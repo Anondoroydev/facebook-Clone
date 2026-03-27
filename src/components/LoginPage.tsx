@@ -4,10 +4,9 @@ import {
   signInWithPopup, 
   GoogleAuthProvider, 
   createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
-  getAuth
+  signInWithEmailAndPassword
 } from 'firebase/auth';
-import { LogIn, UserPlus, Mail, Lock, Chrome } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, Chrome, X } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -17,42 +16,15 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
-    if (loading) {
-      console.log('Login already in progress, ignoring click.');
-      return;
-    }
-
-    console.log('Starting Google Login...');
+    if (loading) return;
     setLoading(true);
     setError('');
-
     try {
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
-
-      console.log('Attempting signInWithPopup...');
-      // Use the stable auth instance from the import
-      const result = await signInWithPopup(auth, provider);
-      console.log('Google Login Success:', result.user.uid);
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
     } catch (err: any) {
-      console.error('Google Login Error:', err);
-      
-      // Handle specific Firebase Auth errors
-      if (err.code === 'auth/unauthorized-domain') {
-        setError(`Unauthorized Domain: Please add "${window.location.hostname}" to your Firebase Console.`);
-      } else if (err.code === 'auth/popup-blocked') {
-        setError('The login popup was blocked by your browser. Please allow popups for this site.');
-      } else if (err.code === 'auth/popup-closed-by-user') {
-        setError('The login window was closed. Please try again.');
-      } else if (err.code === 'auth/cancelled-popup-request') {
-        setError('A login request was already in progress. Please wait a moment.');
-      } else if (err.message?.includes('Pending promise was never set')) {
-        setError('A technical error occurred with the login popup. Please refresh the page and try again.');
-      } else {
-        setError(err.message || 'Google login failed. Please try again.');
-      }
+      setError(err.message || 'Google login failed.');
     } finally {
       setLoading(false);
     }
@@ -60,102 +32,132 @@ export const LoginPage: React.FC = () => {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Starting Email Auth...', isRegister ? 'Register' : 'Login');
     setLoading(true);
     setError('');
     try {
       if (isRegister) {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        console.log('Register Success:', result.user.uid);
+        await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        console.log('Login Success:', result.user.uid);
+        await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      console.error('Email Auth Error:', err);
-      setError(err.message);
+      setError(err.message || 'Authentication failed.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">SocialConnect</h1>
-            <p className="text-gray-500">Connect with friends and the world around you.</p>
-          </div>
+    <div className="min-h-screen bg-(--bg-main) flex items-center justify-center p-6 transition-colors duration-500 selection:bg-(--brand-primary)/20 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-(--brand-primary)/10 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-(--brand-secondary)/10 blur-[120px] rounded-full" />
 
-          <form onSubmit={handleEmailAuth} className="space-y-4">
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+      <div className="max-w-[1240px] w-full flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-24 relative z-10">
+
+        {/* Left Side: Brand info */}
+        <div className="flex-1 text-center lg:text-left">
+          <div className="w-20 h-20 bg-(--brand-gradient) rounded-3xl flex items-center justify-center text-white shadow-2xl shadow-blue-500/30 mb-8 mx-auto lg:mx-0">
+            <span className="text-5xl font-black tracking-tighter italic">S</span>
+          </div>
+          <h1 className="text-6xl lg:text-8xl font-black mb-8 tracking-tight bg-(--brand-gradient) bg-clip-text text-transparent leading-none">
+            Connect.<br />Share.<br />Enjoy.
+          </h1>
+          <p className="text-(--text-secondary) text-xl lg:text-2xl leading-relaxed font-medium max-w-[500px]">
+            SocialConnect helps you bridge the gap with the people you care about most.
+          </p>
+        </div>
+
+
+        {/* Right Side: Login Card */}
+        <div className="flex-1 max-w-[440px] w-full">
+          <div className="glass-card shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] p-8 border border-(--glass-border) animate-fade-in">
+
+            <form onSubmit={handleEmailAuth} className="space-y-4">
               <input
                 type="email"
                 placeholder="Email address"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-4 outline-none focus:border-blue-400 transition-colors"
+                className="w-full premium-input h-14"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-4 outline-none focus:border-blue-400 transition-colors"
+                className="w-full premium-input h-14"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-            </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">
-                {error}
+              {error && (
+                <div className="bg-red-50/50 backdrop-blur-sm border border-red-200/50 text-red-600 px-4 py-3 rounded-xl text-sm text-center font-medium">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full premium-button text-lg h-14"
+              >
+                {loading ? 'Entering...' : 'Sign In'}
+              </button>
+              
+              <div className="text-center">
+                <button type="button" className="text-(--text-secondary) text-sm hover:text-(--brand-primary) transition-colors">Forgotten password?</button>
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
-            >
-              {isRegister ? <UserPlus size={20} /> : <LogIn size={20} />}
-              {loading ? 'Processing...' : isRegister ? 'Create Account' : 'Log In'}
-            </button>
-          </form>
+              <div className="border-t border-(--divider) my-8 pt-8 text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsRegister(true)}
+                  className="bg-(--bg-input) hover:bg-(--fb-hover) text-(--text-primary) font-bold py-4 px-10 rounded-xl text-[17px] transition-all border border-(--divider)"
+                >
+                  Join SocialConnect Today
+                </button>
+              </div>
+            </form>
 
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+            <div className="mt-6">
+              <button 
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-3 bg-white border border-(--divider) hover:bg-gray-50 text-(--text-primary) font-bold py-3.5 rounded-xl transition-all"
+              >
+                <Chrome size={20} className="text-blue-500" />
+                Continue with Google
+              </button>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500 uppercase">Or continue with</span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="w-full bg-white border border-gray-200 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
-          >
-            <Chrome size={20} className="text-red-500" />
-            Google
-          </button>
-
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => setIsRegister(!isRegister)}
-              className="text-blue-600 font-semibold hover:underline"
-            >
-              {isRegister ? 'Already have an account? Log in' : "Don't have an account? Sign up"}
-            </button>
           </div>
         </div>
       </div>
+
+      {isRegister && ( 
+        <div className="fixed inset-0 bg-(--bg-main)/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"> 
+          <div className="max-w-[480px] w-full glass-card shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-in zoom-in-95 duration-300 border border-(--glass-border) p-8"> 
+            <div className="mb-8 flex items-center justify-between"> 
+              <div> 
+                <h2 className="text-4xl font-black text-(--text-primary) tracking-tight">Join Us</h2> 
+                <p className="text-[17px] text-(--text-secondary) font-medium">Create your SocialConnect account.</p> 
+              </div> 
+              <button onClick={() => setIsRegister(false)} className="text-(--text-secondary) hover:bg-(--fb-hover) p-2 rounded-full transition-colors"> 
+                <X size={28} /> 
+              </button> 
+            </div> 
+            <div> 
+              <form onSubmit={handleEmailAuth} className="space-y-6"> 
+                <input type="email" placeholder="Email address" className="w-full premium-input py-4 px-4 text-[16px] font-medium" value={email} onChange={(e) => setEmail(e.target.value)} required /> 
+                <input type="password" placeholder="New password" className="w-full premium-input py-4 px-4 text-[16px] font-medium" value={password} onChange={(e) => setPassword(e.target.value)} required /> 
+                <p className="text-[13px] text-(--text-secondary) leading-relaxed">By joining, you agree to our <span className="text-(--brand-primary) font-semibold cursor-pointer">Terms</span> and <span className="text-(--brand-primary) font-semibold cursor-pointer">Privacy Policy</span>.</p> 
+                <div className="pt-4"> 
+                  <button type="submit" className="w-full premium-button text-lg h-14">Start Connecting</button> 
+                </div> 
+              </form> 
+            </div> 
+          </div> 
+        </div> 
+      )}
     </div>
   );
 };
