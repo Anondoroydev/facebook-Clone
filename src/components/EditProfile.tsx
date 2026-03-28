@@ -113,7 +113,7 @@ export function EditProfile({ user, onClose, onUpdate, theme, onToggleTheme }: E
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    const dataUrl = await compressImage(file, 400, 400, 0.8);
+                    const dataUrl = await compressImage(file, 1080, 1080, 0.95);
                     setPhotoURL(dataUrl);
                   }
                 }}
@@ -146,7 +146,7 @@ export function EditProfile({ user, onClose, onUpdate, theme, onToggleTheme }: E
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    const dataUrl = await compressImage(file, 1200, 400, 0.7);
+                    const dataUrl = await compressImage(file, 1920, 1080, 0.95);
                     setCoverPhotoURL(dataUrl);
                   }
                 }}

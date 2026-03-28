@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ThumbsUp, MessageSquare, Share2, MoreHorizontal, User as UserIcon, Trash2, Globe, Send } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Share2, MoreHorizontal, User as UserIcon, Trash2, Globe, Send, X, Play } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Post, Comment, UserProfile } from '../types';
 import { postService } from '../services/postService';
@@ -16,9 +16,35 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
   const [commentText, setCommentText] = useState('');
   const [isLiking, setIsLiking] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const isLiked = post.likes.includes(currentUser.uid);
+  const parsedReactions: Record<string, string> = {};
+  post.likes.forEach(like => {
+    if (like.includes(':')) {
+      const [uid, emoji] = like.split(':');
+      if (uid && emoji) parsedReactions[uid] = emoji;
+    }
+  });
+
+  const isLiked = post.likes.includes(currentUser.uid) || post.likes.some(l => l.startsWith(`${currentUser.uid}:`));
+  const existingReaction = parsedReactions[currentUser.uid];
+  const [userReaction, setUserReaction] = useState<string | null>(existingReaction || (isLiked ? '👍' : null));
+  const [showReactionsMobile, setShowReactionsMobile] = useState(false);
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const freshReactions: Record<string, string> = {};
+    post.likes.forEach(like => {
+      if (like.includes(':')) {
+        const [uid, emoji] = like.split(':');
+        if (uid && emoji) freshReactions[uid] = emoji;
+      }
+    });
+    
+    setUserReaction(freshReactions[currentUser.uid] || 
+                   (post.likes.includes(currentUser.uid) || post.likes.some(l => l.startsWith(`${currentUser.uid}:`)) ? '👍' : null));
+  }, [post.likes, currentUser.uid]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,16 +69,27 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
     }
   };
 
-  const handleLike = async () => {
+  const handleLike = async (emoji: string = '👍') => {
     if (isLiking) return;
     setIsLiking(true);
+    
+    const isRemoving = isLiked && (userReaction === emoji || (emoji === '👍' && (!existingReaction || existingReaction === '👍')));
+
+    // Optimistic UI update
+    setUserReaction(isRemoving ? null : emoji);
+
     try {
-      await postService.likePost(post.id, currentUser.uid, isLiked, post.authorId, currentUser.displayName);
+      await postService.likePost(post.id, currentUser.uid, isRemoving, post.authorId, currentUser.displayName, isRemoving ? null : emoji);
     } catch (error) {
       console.error('Error liking post:', error);
+      setUserReaction(existingReaction || (isLiked ? '👍' : null));
     } finally {
       setIsLiking(false);
     }
+  };
+
+  const handleReactionClick = async (reaction: string) => {
+    await handleLike(reaction);
   };
 
   const handleAddComment = async (e: React.FormEvent) => {
@@ -107,6 +144,31 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
       setIsDeleting(false);
     }
   };
+
+  // Calculate reaction counts properly handling legacy likes
+  const reactionCounts: Record<string, number> = {};
+  const baseLikes = post.likes.filter(l => !l.includes(':'));
+  const totalReactions = baseLikes.length;
+  
+  let explicitReactionCount = 0;
+  if (Object.keys(parsedReactions).length > 0) {
+    Object.values(parsedReactions).forEach(r => {
+      reactionCounts[r] = (reactionCounts[r] || 0) + 1;
+      explicitReactionCount++;
+    });
+  }
+  
+  // Backwards compatibility: add missing legacy likes as default '👍'
+  const legacyLikesCount = totalReactions - explicitReactionCount;
+  if (legacyLikesCount > 0) {
+    reactionCounts['👍'] = (reactionCounts['👍'] || 0) + legacyLikesCount;
+  }
+  
+  // Get top 3 reactions
+  const topReactions = Object.entries(reactionCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(e => e[0]);
 
   return (
     <div className="glass-card mb-2 md:mb-6 overflow-hidden text-(--text-primary) border-y md:border border-(--glass-border) rounded-none md:rounded-[16px] animate-fade-in shadow-sm md:shadow-xl shadow-black/5">
@@ -172,19 +234,21 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
         </div>
       </div>
 
-      {/* Content */}
       {post.content && (
         <div className="px-4 pb-3">
-          <p className="text-(--text-primary) whitespace-pre-wrap break-words text-[15px] leading-relaxed font-medium">{post.content}</p>
+          <p className="text-(--text-primary) whitespace-pre-wrap wrap-break-word text-[15px] leading-relaxed font-medium">{post.content}</p>
         </div>
       )}
 
       {post.imageUrl && (
-        <div className="w-full bg-black/5 border-y border-(--divider)/30 relative overflow-hidden flex items-center justify-center">
+        <div 
+          className="w-full bg-black/5 border-y border-(--divider)/30 relative overflow-hidden flex items-center justify-center cursor-pointer group"
+          onClick={() => setFullScreenImage(true)}
+        >
           <img 
             src={post.imageUrl} 
             alt="Post content" 
-            className="max-w-full max-h-[600px] object-contain relative z-10"
+            className="max-w-full max-h-[600px] object-contain relative z-10 group-hover:opacity-95 transition-opacity"
             referrerPolicy="no-referrer"
           />
         </div>
@@ -221,13 +285,17 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
       {/* Stats */}
       <div className="py-2.5 flex items-center justify-between text-(--text-secondary) text-[13px] border-b border-(--divider)/30 mx-4 font-bold uppercase tracking-tight">
         <div className="flex items-center gap-1.5 min-h-6">
-          {post.likes.length > 0 && (
-            <>
-              <div className="bg-(--brand-primary) p-1 rounded-full flex items-center justify-center shadow-sm shadow-blue-500/20">
-                <ThumbsUp size={10} className="text-white" fill="white" />
+          {totalReactions > 0 && (
+            <div className="flex items-center">
+              <div className="flex -space-x-1 mr-1.5 hover:underline cursor-pointer">
+                {topReactions.map((emoji, i) => (
+                  <div key={emoji} className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] bg-(--bg-card) border border-(--divider) shadow-sm" style={{ zIndex: 3 - i }}>
+                    {emoji === '👍' ? <div className="bg-(--brand-primary) w-full h-full rounded-full flex items-center justify-center"><ThumbsUp size={8} className="text-white" fill="white" /></div> : emoji}
+                  </div>
+                ))}
               </div>
-              <span className="hover:underline cursor-pointer">{post.likes.length} Likes</span>
-            </>
+              <span className="hover:underline cursor-pointer">{totalReactions}</span>
+            </div>
           )}
         </div>
 
@@ -241,14 +309,64 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
       </div>
 
       {/* Actions */}
-      <div className="px-1 py-1 flex items-center justify-around border-t border-(--divider)/30 mx-4">
-        <button 
-          onClick={handleLike}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 ${isLiked ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
+      <div className="px-1 py-1 flex items-center justify-around border-t border-(--divider)/30 mx-4 relative overflow-visible">
+        
+        {/* Like Button Wrapper with Reaction Popup */}
+        <div 
+          className="flex-1 relative group"
+          onTouchStart={() => {
+            pressTimer.current = setTimeout(() => setShowReactionsMobile(true), 400); // long press for 400ms
+          }}
+          onTouchEnd={() => {
+            if (pressTimer.current) clearTimeout(pressTimer.current);
+          }}
+          onTouchMove={() => {
+            if (pressTimer.current) clearTimeout(pressTimer.current);
+          }}
+          onMouseLeave={() => setShowReactionsMobile(false)}
         >
-          <ThumbsUp size={18} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? "scale-110" : ""} />
-          <span className="font-black text-[14px] uppercase tracking-tight">Like</span>
-        </button>
+          
+          {/* Reaction Popup Menu Wrapper (bridges the gap so hover isn't lost) */}
+          <div className={`absolute bottom-full left-0 md:left-2 pb-2 z-50 transition-all duration-300 ${showReactionsMobile ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto'}`}>
+            <div className="bg-(--bg-card) backdrop-blur-xl rounded-full shadow-2xl border border-(--divider) px-3 py-2 flex items-center gap-2 sm:gap-3">
+              {['👍', '❤️', '😂', '😮', '😢', '😡'].map(emoji => (
+                <button 
+                  key={emoji}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleReactionClick(emoji);
+                    setShowReactionsMobile(false);
+                  }}
+                  className="text-2xl sm:text-3xl hover:scale-125 transition-transform origin-bottom"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button 
+            onClick={() => handleLike('👍')}
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 ${isLiked ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
+          >
+            {userReaction === '❤️' ? <span className="text-xl block animate-in zoom-in duration-300">❤️</span> : 
+             userReaction === '😂' ? <span className="text-xl block animate-in zoom-in duration-300">😂</span> :
+             userReaction === '😮' ? <span className="text-xl block animate-in zoom-in duration-300">😮</span> :
+             userReaction === '😢' ? <span className="text-xl block animate-in zoom-in duration-300">😢</span> :
+             userReaction === '😡' ? <span className="text-xl block animate-in zoom-in duration-300">😡</span> :
+             <ThumbsUp size={18} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? "scale-110" : ""} />
+            }
+            <span className="font-black text-[14px] uppercase tracking-tight">
+              {userReaction === '👍' ? 'Like' : 
+               userReaction === '❤️' ? 'Love' :
+               userReaction === '😂' ? 'Haha' :
+               userReaction === '😮' ? 'Wow' :
+               userReaction === '😢' ? 'Sad' :
+               userReaction === '😡' ? 'Angry' : 'Like'}
+            </span>
+          </button>
+        </div>
 
         <button 
           onClick={() => setShowComments(!showComments)}
@@ -289,7 +407,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
                       <button onClick={() => onViewProfile && onViewProfile(comment.authorId)} className="font-black text-[12px] text-(--text-primary) hover:underline block text-left tracking-tight truncate max-w-[140px] sm:max-w-[200px]">
                         {comment.authorName}
                       </button>
-                      <p className="text-[14px] text-(--text-primary) leading-snug font-medium break-words">{comment.content}</p>
+                      <p className="text-[14px] text-(--text-primary) leading-snug font-medium wrap-break-word">{comment.content}</p>
                     </div>
                     <div className="flex items-center gap-3 mt-1 ml-2 text-[10px] font-bold text-(--text-secondary) uppercase tracking-tighter">
                       <span>{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
@@ -325,6 +443,42 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Full Screen Post Image Modal */}
+      {fullScreenImage && post.imageUrl && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-9999 flex items-center justify-center animate-in fade-in"
+          onClick={() => setFullScreenImage(false)}
+        >
+          <button 
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-white hover:bg-white/20 p-3 rounded-full transition-colors z-10000 cursor-pointer"
+            onClick={(e) => { 
+              e.preventDefault();
+              e.stopPropagation(); 
+              setFullScreenImage(false); 
+            }}
+            aria-label="Close full screen image"
+          >
+            <X size={32} />
+          </button>
+          
+          <div 
+            className="relative w-full h-full p-4 md:p-12 flex items-center justify-center cursor-pointer"
+            onClick={() => setFullScreenImage(false)}
+          >
+            <img 
+              src={post.imageUrl} 
+              alt="Full screen post" 
+              className="w-full h-full object-contain drop-shadow-2xl brightness-110 cursor-zoom-out animate-in zoom-in-50 duration-300 ease-out"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setFullScreenImage(false);
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

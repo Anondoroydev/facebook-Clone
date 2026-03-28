@@ -429,7 +429,11 @@ export default function App() {
                   className="shrink-0 w-[140px] h-[240px] glass-card overflow-hidden relative group cursor-pointer border border-(--glass-border) bg-black"
                 >
                   <div className="h-[180px] overflow-hidden flex items-center justify-center bg-black/40">
-                    <img src={profile.photoURL || 'https://picsum.photos/seed/user/400/600'} alt="Your Story" className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out" />
+                    <img 
+                      src={profile.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.displayName)}&background=random&size=400`} 
+                      alt="Your Story" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" 
+                    />
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-(--bg-card) flex flex-col items-center justify-center pt-5">
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-(--brand-gradient) rounded-2xl border-4 border-(--bg-card) flex items-center justify-center text-white z-10 shadow-lg shadow-blue-500/40">
@@ -446,7 +450,7 @@ export default function App() {
                   <div 
                     key={story.id} 
                     onClick={() => setViewingStoryIndex(index)}
-                    className="shrink-0 w-32 h-56 bg-black rounded-2xl overflow-hidden relative group cursor-pointer border border-(--glass-border) shadow-xl shadow-black/20"
+                    className="shrink-0 w-[140px] h-[240px] bg-black rounded-2xl overflow-hidden relative group cursor-pointer border border-(--glass-border) shadow-xl shadow-black/20"
                   >
                     {/* Blurred Background */}
                     <div 
@@ -458,16 +462,16 @@ export default function App() {
                       }}
                     />
                     
-                    <div className="w-full h-full relative z-10 flex items-center justify-center p-1">
+                    <div className="w-full h-full relative z-10 flex items-center justify-center">
                       <img 
                         src={story.imageUrl} 
                         alt={story.userName} 
-                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-in-out" 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out" 
                       />
                     </div>
                     
                     {/* Story Profile Pic */}
-                    <div className="absolute top-3 left-3 w-10 h-10 rounded-full border-4 border-(--brand-primary) overflow-hidden bg-(--bg-card) z-20 shadow-lg">
+                    <div className="absolute top-3 left-3 w-10 h-10 rounded-full border-2 border-(--brand-primary) overflow-hidden bg-(--bg-card) z-20 shadow-lg">
 
 
                       {story.userPhoto ? (
@@ -493,7 +497,7 @@ export default function App() {
                 ))}
 
                 {stories.length === 0 && [1, 2, 3].map((i) => (
-                  <div key={i} className="shrink-0 w-[112px] h-[200px] bg-gray-100 rounded-xl shadow-sm border border-[#CED0D4]/30 overflow-hidden relative animate-pulse">
+                  <div key={i} className="shrink-0 w-[140px] h-[240px] bg-gray-100 rounded-2xl shadow-sm border border-[#CED0D4]/30 overflow-hidden relative animate-pulse">
                     <div className="w-full h-full bg-gray-200" />
                   </div>
                 ))}

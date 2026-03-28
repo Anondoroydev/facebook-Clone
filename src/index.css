@@ -11,8 +11,8 @@
   --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
   
   --bg-main: #F8FAFC;
-  --bg-sidebar: rgba(255, 255, 255, 0.7);
-  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
   --bg-input: rgba(0, 0, 0, 0.04);
   
   --text-primary: #0F172A;
@@ -37,8 +37,8 @@
 
 [data-theme='dark'] {
   --bg-main: #020617;
-  --bg-sidebar: rgba(15, 23, 42, 0.7);
-  --bg-card: rgba(30, 41, 59, 0.8);
+  --bg-sidebar: #0f172a;
+  --bg-card: #1e293b;
   --bg-input: rgba(255, 255, 255, 0.06);
   
   --text-primary: #F8FAFC;

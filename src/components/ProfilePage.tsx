@@ -98,7 +98,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     if (file && isOwnProfile) {
       setIsUploading(true);
       try {
-        const url = await compressImage(file, 400, 400, 0.8);
+        const url = await compressImage(file, 1080, 1080, 0.95);
         await userService.updateProfile(user.uid, { photoURL: url });
         await postService.createPost(
           user.uid,
@@ -117,7 +117,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
     if (file && isOwnProfile) {
       setIsUploading(true);
       try {
-        const url = await compressImage(file, 1200, 400, 0.7);
+        const url = await compressImage(file, 1920, 1080, 0.95);
         await userService.updateProfile(user.uid, { coverPhotoURL: url });
         await postService.createPost(
           user.uid,
@@ -242,11 +242,29 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 {(user.friends || []).length} friends
               </p>
               {/* Mutual friend avatars */}
-              <div className="flex -space-x-1.5 mt-2 justify-center sm:justify-start">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <img key={i} src={`https://picsum.photos/seed/friend${i}/100/100`} className="w-7 h-7 rounded-full border-2 border-white object-cover" alt="Friend" />
-                ))}
-              </div>
+              {friendProfiles.length > 0 && (
+                <div className="flex -space-x-2 mt-2 justify-center sm:justify-start">
+                  {friendProfiles.slice(0, 8).map(friend => (
+                    <button 
+                      key={friend.uid} 
+                      onClick={() => onViewProfile(friend.uid)}
+                      className="transition-transform hover:-translate-y-1"
+                    >
+                      <img 
+                        src={friend.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(friend.displayName)}&background=random&size=100`} 
+                        className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm bg-white" 
+                        alt={friend.displayName}
+                        title={friend.displayName}
+                      />
+                    </button>
+                  ))}
+                  {friendProfiles.length > 8 && (
+                    <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-600 shadow-sm">
+                      +{friendProfiles.length - 8}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action buttons — pinned to bottom-right on sm+ */}
@@ -510,21 +528,37 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
       {/* Full Screen Image Modal */}
       {fullScreenImage && (
         <div 
-          className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 bg-black/95 z-9999 flex items-center justify-center animate-in fade-in"
           onClick={() => setFullScreenImage(null)}
         >
+          {/* Close button with high z-index and explicit cursor */}
           <button 
-            className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
-            onClick={(e) => { e.stopPropagation(); setFullScreenImage(null); }}
+            className="absolute top-4 right-4 md:top-6 md:right-6 text-white hover:bg-white/20 p-3 rounded-full transition-colors z-10000 cursor-pointer"
+            onClick={(e) => { 
+              e.preventDefault();
+              e.stopPropagation(); 
+              setFullScreenImage(null); 
+            }}
+            aria-label="Close full screen image"
           >
-            <X size={28} />
+            <X size={32} />
           </button>
-          <img 
-            src={fullScreenImage} 
-            alt="Full screen" 
-            className="w-full h-full object-contain p-4 md:p-8 scale-in-center drop-shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+          
+          <div 
+            className="relative w-full h-full p-4 md:p-12 flex items-center justify-center cursor-pointer"
+            onClick={() => setFullScreenImage(null)}
+          >
+            <img 
+              src={fullScreenImage} 
+              alt="Full screen" 
+              className="w-full h-full object-contain drop-shadow-2xl brightness-110 cursor-zoom-out animate-in zoom-in-50 duration-300 ease-out"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setFullScreenImage(null);
+              }}
+            />
+          </div>
         </div>
       )}
 

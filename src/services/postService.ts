@@ -7,12 +7,14 @@ import {
   onSnapshot, 
   updateDoc, 
   doc, 
+  getDoc,
   deleteDoc, 
   getDocs,
   serverTimestamp,
   increment,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  deleteField
 } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { Post, Comment } from '../types';
@@ -48,13 +50,26 @@ export const postService = {
     });
   },
 
-  likePost: async (postId: string, userId: string, isLiked: boolean, authorId: string, userName: string) => {
+  likePost: async (postId: string, userId: string, isLiked: boolean, authorId: string, userName: string, reactionType: string | null = '👍') => {
     const path = `posts/${postId}`;
     try {
       const postRef = doc(db, 'posts', postId);
-      await updateDoc(postRef, {
-        likes: isLiked ? arrayRemove(userId) : arrayUnion(userId)
-      });
+      const allReactionStrings = ['👍', '❤️', '😂', '😮', '😢', '😡'].map(emoji => `${userId}:${emoji}`);
+
+      if (isLiked && !reactionType) {
+        // Remove both the base like and any specific reaction tags
+        await updateDoc(postRef, {
+          likes: arrayRemove(userId, ...allReactionStrings)
+        });
+      } else {
+        // First clear previous tags to prevent duplicates, then add the new one, along with base uid
+        await updateDoc(postRef, {
+          likes: arrayRemove(...allReactionStrings)
+        });
+        await updateDoc(postRef, {
+          likes: arrayUnion(userId, `${userId}:${reactionType || '👍'}`)
+        });
+      }
 
       if (!isLiked && userId !== authorId) {
         const { notificationService } = await import('./notificationService');
