@@ -30,6 +30,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   const [friendProfiles, setFriendProfiles] = useState<UserProfile[]>([]);
   const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'friends' | 'photos' | 'videos'>('posts');
   const [isUploading, setIsUploading] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [friendStatus, setFriendStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'friends'>('none');
   const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
   const isOwnProfile = user.uid === currentUser.uid;
@@ -144,7 +145,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           onClick={() => isOwnProfile && coverInputRef.current?.click()}
         >
           {user.coverPhotoURL ? (
-            <img src={user.coverPhotoURL} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <img 
+              src={user.coverPhotoURL} 
+              alt="Cover" 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              onClick={(e) => { 
+                if (!isOwnProfile) {
+                  e.stopPropagation(); 
+                  setFullScreenImage(user.coverPhotoURL!); 
+                }
+              }}
+            />
           ) : (
             <div className="w-full h-full bg-linear-to-r from-[#1877F2]/20 to-[#1877F2]/40 flex flex-col items-center justify-center gap-2">
               <Camera size={40} className="text-(--brand-primary)/40" />
@@ -192,7 +203,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
             <div className="relative self-center sm:self-auto shrink-0">
               <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full border-4 border-(--bg-sidebar) bg-(--bg-card) shadow-2xl overflow-hidden">
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" />
+                  <img 
+                    src={user.photoURL} 
+                    alt={user.displayName} 
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+                    onClick={() => setFullScreenImage(user.photoURL!)}
+                  />
                 ) : (
                   <div className="w-full h-full bg-(--fb-hover) flex items-center justify-center text-(--fb-text-secondary)">
                     <UserIcon size={64} />
@@ -248,9 +264,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                     className="bg-[#E4E6EB] text-[#050505] px-3 py-2 rounded-lg font-semibold hover:bg-[#D8DADF] transition-colors flex items-center gap-1.5 text-sm"
                   >
                     <Edit2 size={16} /> Edit
-                  </button>
-                  <button className="bg-[#E4E6EB] text-[#050505] p-2 rounded-lg font-bold hover:bg-[#D8DADF] transition-colors">
-                    <Settings size={18} strokeWidth={2.5} />
                   </button>
                 </>
               ) : (
@@ -493,6 +506,28 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
           </div>
         )}
       </div>
+
+      {/* Full Screen Image Modal */}
+      {fullScreenImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-100 flex items-center justify-center backdrop-blur-sm animate-in fade-in"
+          onClick={() => setFullScreenImage(null)}
+        >
+          <button 
+            className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+            onClick={(e) => { e.stopPropagation(); setFullScreenImage(null); }}
+          >
+            <X size={28} />
+          </button>
+          <img 
+            src={fullScreenImage} 
+            alt="Full screen" 
+            className="w-full h-full object-contain p-4 md:p-8 scale-in-center drop-shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
     </div>
   );
 };

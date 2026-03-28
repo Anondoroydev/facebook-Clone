@@ -752,11 +752,13 @@ export default function App() {
                     onClick={(e) => { e.stopPropagation(); handleViewProfile(friend.uid); }}
                   >
                     {friend.photoURL ? (
-                      <img src={friend.photoURL} alt="" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
+                      <img src={friend.photoURL} alt="" className="w-10 h-10 rounded-xl object-cover shadow-sm bg-white" />
                     ) : (
-                      <div className="w-10 h-10 rounded-xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
-                        <UserIcon size={20} />
-                      </div>
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(friend.displayName)}&background=random`} 
+                        alt={friend.displayName} 
+                        className="w-10 h-10 rounded-xl object-cover shadow-sm bg-white" 
+                      />
                     )}
                     <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-(--bg-card) rounded-full" />
                   </div>
