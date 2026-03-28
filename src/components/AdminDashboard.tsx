@@ -59,7 +59,7 @@ export function AdminDashboard({ onClose, onViewProfile }: AdminDashboardProps) 
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-100 flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-5xl h-[80vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
+      <div className="glass-card w-full max-w-5xl h-[80vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
         {/* Header */}
         <div className="p-6 bg-linear-to-r from-gray-900 to-gray-800 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -77,22 +77,22 @@ export function AdminDashboard({ onClose, onViewProfile }: AdminDashboardProps) 
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-100 bg-gray-50/50">
+        <div className="flex border-b border-(--glass-border) bg-(--bg-input)">
           <button 
             onClick={() => setActiveTab('users')}
-            className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'users' ? 'text-blue-600 bg-white border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'users' ? 'text-(--brand-primary) bg-(--bg-card) border-b-2 border-(--brand-primary)' : 'text-(--text-secondary) hover:text-(--text-primary)'}`}
           >
             <Users size={20} /> Users ({users.length})
           </button>
           <button 
             onClick={() => setActiveTab('posts')}
-            className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'posts' ? 'text-blue-600 bg-white border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'posts' ? 'text-(--brand-primary) bg-(--bg-card) border-b-2 border-(--brand-primary)' : 'text-(--text-secondary) hover:text-(--text-primary)'}`}
           >
             <FileText size={20} /> Posts ({posts.length})
           </button>
           <button 
             onClick={() => setActiveTab('stories')}
-            className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'stories' ? 'text-blue-600 bg-white border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex-1 py-4 flex items-center justify-center gap-2 font-bold transition-all ${activeTab === 'stories' ? 'text-(--brand-primary) bg-(--bg-card) border-b-2 border-(--brand-primary)' : 'text-(--text-secondary) hover:text-(--text-primary)'}`}
           >
             <ImageIcon size={20} /> Stories ({stories.length})
           </button>
@@ -101,36 +101,36 @@ export function AdminDashboard({ onClose, onViewProfile }: AdminDashboardProps) 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
           {loading ? (
-            <div className="h-full flex flex-col items-center justify-center text-gray-400">
+            <div className="h-full flex flex-col items-center justify-center text-(--text-secondary)">
               <Loader2 className="animate-spin mb-4" size={48} />
               <p className="font-bold">Accessing Secure Records...</p>
             </div>
           ) : (
             <div className="space-y-4">
               {activeTab === 'users' && users.map(u => (
-                <div key={u.uid} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors border border-gray-100">
+                <div key={u.uid} className="flex items-center justify-between p-4 bg-(--bg-input) rounded-2xl hover:bg-(--fb-hover) transition-colors border border-(--glass-border)">
                   <div className="flex items-center gap-4">
                     <img src={u.photoURL || 'https://via.placeholder.com/150'} className="w-12 h-12 rounded-xl object-cover" alt="" />
                     <div>
-                      <h4 className="font-bold text-gray-900">{u.displayName}</h4>
-                      <p className="text-xs text-gray-500">{u.email} • <span className="uppercase font-bold text-blue-600">{u.role}</span></p>
+                      <h4 className="font-bold text-(--text-primary)">{u.displayName}</h4>
+                      <p className="text-xs text-(--text-secondary)">{u.email} • <span className="uppercase font-bold text-(--brand-primary)">{u.role}</span></p>
                     </div>
                   </div>
-                  <button onClick={() => onViewProfile(u.uid)} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                  <button onClick={() => onViewProfile(u.uid)} className="p-2 text-(--text-secondary) hover:text-(--brand-primary) transition-colors">
                     <ChevronRight size={20} />
                   </button>
                 </div>
               ))}
 
               {activeTab === 'posts' && posts.map(p => (
-                <div key={p.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group">
+                <div key={p.id} className="flex items-start justify-between p-4 bg-(--bg-input) rounded-2xl border border-(--glass-border) group">
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center font-bold text-xl">
+                    <div className="w-12 h-12 bg-(--brand-primary)/10 text-(--brand-primary) rounded-xl flex items-center justify-center font-bold text-xl">
                       {p.authorName[0]}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-gray-900">{p.authorName}</h4>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{p.content}</p>
+                      <h4 className="font-bold text-(--text-primary)">{p.authorName}</h4>
+                      <p className="text-sm text-(--text-secondary) mt-1 line-clamp-2">{p.content}</p>
                       {p.imageUrl && <p className="text-[10px] text-blue-500 mt-1 font-bold">IMAGE ATTACHED</p>}
                     </div>
                   </div>
@@ -144,13 +144,13 @@ export function AdminDashboard({ onClose, onViewProfile }: AdminDashboardProps) 
               ))}
 
               {activeTab === 'stories' && stories.map(s => (
-                <div key={s.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 group">
+                <div key={s.id} className="flex items-start justify-between p-4 bg-(--bg-input) rounded-2xl border border-(--glass-border) group">
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 relative rounded-xl overflow-hidden bg-black/5">
+                    <div className="w-12 h-12 relative rounded-xl overflow-hidden bg-(--bg-input)">
                       <img src={s.imageUrl} className="w-full h-full object-cover" alt="" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-gray-900">{s.userName}</h4>
+                      <h4 className="font-bold text-(--text-primary)">{s.userName}</h4>
                       <p className="text-[10px] text-blue-500 mt-1 font-bold uppercase">{s.type || 'image'}</p>
                     </div>
                   </div>

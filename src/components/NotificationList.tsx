@@ -48,27 +48,27 @@ export const NotificationList: React.FC<NotificationListProps> = ({ notification
 
   if (notifications.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-12 text-center border border-gray-100 shadow-sm">
-        <Bell size={48} className="mx-auto text-gray-200 mb-4" />
-        <p className="text-gray-500 font-medium">No notifications yet</p>
+      <div className="glass-card p-12 text-center border border-(--glass-border) shadow-sm">
+        <Bell size={48} className="mx-auto text-(--text-secondary) opacity-50 mb-4" />
+        <p className="text-(--text-secondary) font-medium">No notifications yet</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="glass-card shadow-sm border border-(--glass-border) overflow-hidden">
       {notifications.map(notification => (
         <div 
           key={notification.id}
           onClick={() => handleMarkAsRead(notification.id)}
-          className={`p-4 flex items-start gap-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer relative group ${!notification.read ? 'bg-blue-50/50' : ''}`}
+          className={`p-4 flex items-start gap-4 border-b border-(--glass-border) hover:bg-(--fb-hover) transition-colors cursor-pointer relative group ${!notification.read ? 'bg-(--brand-primary)/5' : ''}`}
         >
           <div className="mt-1">
             {getIcon(notification.type)}
           </div>
           <div className="flex-1">
-            <p className="text-sm text-gray-800">{getMessage(notification)}</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm text-(--text-primary)">{getMessage(notification)}</p>
+            <p className="text-xs text-(--text-secondary) mt-1">
               {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
             </p>
           </div>

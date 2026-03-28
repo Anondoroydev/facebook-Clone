@@ -82,10 +82,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
   };
 
   return (
-    <div className="fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 bg-white rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-gray-200 flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 glass-card rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-(--glass-border) flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300">
 
       {/* Header */}
-      <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-blue-600 text-white rounded-t-xl">
+      <div className="p-3 border-b border-(--glass-border) flex items-center justify-between bg-(--brand-primary) text-white rounded-t-xl">
         <div className="flex items-center gap-2">
           <div className="relative">
             {otherUser.photoURL ? (
@@ -124,16 +124,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-transparent">
         {messages.map(msg => {
           const isMe = msg.senderId === currentUser.uid;
           return (
             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm ${
-                isMe ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-gray-800 rounded-bl-none'
+                isMe ? 'bg-(--brand-primary) text-white rounded-br-none' : 'bg-(--bg-input) text-(--text-primary) rounded-bl-none'
               }`}>
                 <p>{msg.content}</p>
-                <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
+                <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-blue-100' : 'text-(--text-secondary)'}`}>
                   <p className="text-[9px]">
                     {format(new Date(msg.createdAt), 'HH:mm')}
                   </p>
@@ -150,18 +150,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
 
 
       {/* Input */}
-      <form onSubmit={handleSend} className="p-3 border-t border-gray-100 flex items-center gap-2">
+      <form onSubmit={handleSend} className="p-3 border-t border-(--glass-border) flex items-center gap-2">
         <input
           type="text"
           placeholder="Type a message..."
-          className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none focus:bg-gray-200 transition-colors"
+          className="flex-1 bg-(--bg-input) text-(--text-primary) rounded-full px-4 py-2 text-sm outline-none focus:bg-(--fb-hover) transition-colors border border-transparent focus:border-(--glass-border)"
           value={inputText}
           onChange={handleInputChange}
         />
         <button 
           type="submit"
           disabled={!inputText.trim()}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:text-gray-300"
+          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors disabled:text-(--text-secondary) disabled:opacity-50"
         >
           <Send size={20} />
         </button>

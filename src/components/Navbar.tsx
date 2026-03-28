@@ -290,7 +290,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="fixed md:absolute top-18 md:top-full left-0 md:left-auto right-0 mt-0 md:mt-3 w-full md:w-85 h-[calc(100vh-72px)] md:h-auto glass-card rounded-none! md:rounded-xl! shadow-2xl border-x-0 md:border-x border-b md:border-t border-(--glass-border) p-5 z-70 animate-fade-in overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-black text-(--text-primary) tracking-tight">Alerts</h3>
-                <button onClick={() => { onNavigate('notifications'); setIsNotificationsOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
+                <button onClick={() => { navigate('/notifications'); setIsNotificationsOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
               </div>
               <div className="py-8 text-center text-(--text-secondary) font-medium">No new notifications</div>
             </div>
@@ -318,7 +318,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isProfileOpen && (
             <div className="absolute top-full right-0 mt-3 w-75 glass-card shadow-2xl border border-(--glass-border) p-3 z-70 animate-fade-in">
               <div 
-                onClick={() => { onNavigate('profile'); setIsProfileOpen(false); }}
+                onClick={() => { navigate('/profile'); setIsProfileOpen(false); }}
                 className="p-3 hover:bg-(--fb-hover) rounded-2xl cursor-pointer flex items-center gap-4 transition-all duration-300 group"
               >
                 {user?.photoURL ? (

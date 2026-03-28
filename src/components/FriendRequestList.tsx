@@ -72,17 +72,17 @@ const FriendRequestCard: React.FC<{ request: FriendRequest, onRespond: (id: stri
 
   if (isResponded && responseStatus === 'accepted') {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-4 flex flex-col items-center text-center">
+      <div className="glass-card overflow-hidden p-4 flex flex-col items-center text-center">
         <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border-2 border-green-500">
           {sender.photoURL ? (
             <img src={sender.photoURL} alt={sender.displayName} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+            <div className="w-full h-full flex items-center justify-center bg-(--brand-primary)/10 text-(--brand-primary)">
               <UserIcon size={32} />
             </div>
           )}
         </div>
-        <h4 className="font-bold text-gray-900">{sender.displayName}</h4>
+        <h4 className="font-bold text-(--text-primary)">{sender.displayName}</h4>
         <p className="text-sm text-green-600 font-medium mt-1">Request Accepted!</p>
         <button 
           onClick={() => {
@@ -99,25 +99,25 @@ const FriendRequestCard: React.FC<{ request: FriendRequest, onRespond: (id: stri
 
   if (isResponded && responseStatus === 'declined') {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden p-4 flex flex-col items-center text-center opacity-60">
-        <p className="text-gray-500 font-medium">Request removed</p>
+      <div className="glass-card overflow-hidden p-4 flex flex-col items-center text-center opacity-60">
+        <p className="text-(--text-secondary) font-medium">Request removed</p>
       </div>
     );
   }
 
   return (
     <div className="bg-(--fb-card) rounded-xl border border-(--fb-divider)/30 shadow-sm overflow-hidden flex md:flex-col items-center md:items-stretch gap-4 md:gap-0 p-3 md:p-0">
-      <div className="w-20 md:w-full aspect-square bg-gray-100 rounded-xl md:rounded-none shrink-0 overflow-hidden">
+      <div className="w-20 md:w-full aspect-square bg-(--bg-input) rounded-xl md:rounded-none shrink-0 overflow-hidden">
         {sender.photoURL ? (
           <img src={sender.photoURL} alt={sender.displayName} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-(--brand-primary) bg-(--brand-primary)/5">
             <UserIcon size={32} />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="font-bold text-[15px] text-gray-900 truncate tracking-tight">{sender.displayName}</h4>
+        <h4 className="font-bold text-[15px] text-(--text-primary) truncate tracking-tight">{sender.displayName}</h4>
         <div className="mt-2 flex gap-2">
           <button 
             onClick={() => handleAction('accepted')}

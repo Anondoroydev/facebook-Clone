@@ -22,12 +22,12 @@ import { StoryViewer } from './components/StoryViewer';
 import { AdminDashboard } from './components/AdminDashboard';
 import { storyService, Story } from './services/storyService';
 import { Loader2, Users, MessageSquare, Bell, User as UserIcon, Home, Trash2, Settings, Phone, Video, Play, Store, LayoutGrid, Plus, ShieldAlert, Check, UserPlus } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activePage, setActivePage] = useState('home');
   const [posts, setPosts] = useState<Post[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
@@ -45,6 +45,29 @@ export default function App() {
   const [activeCall, setActiveCall] = useState<{ otherUser: UserProfile; type: 'audio' | 'video'; isIncoming: boolean } | null>(null);
   const [viewingUser, setViewingUser] = useState<UserProfile | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const path = location.pathname;
+  
+  let activePage = 'home';
+  if (path.startsWith('/friends')) activePage = 'friends';
+  else if (path.startsWith('/messages')) activePage = 'messages';
+  else if (path.startsWith('/profile')) activePage = 'profile';
+  else if (path.startsWith('/notifications')) activePage = 'notifications';
+  else if (path.startsWith('/video')) activePage = 'video';
+  else if (path.startsWith('/marketplace')) activePage = 'marketplace';
+  else if (path.startsWith('/groups')) activePage = 'groups';
+
+  useEffect(() => {
+    // Handle direct navigation to a profile
+    if (path.startsWith('/profile/')) {
+      const uid = path.split('/')[2];
+      if (uid && profile && uid !== profile.uid && (!viewingUser || viewingUser.uid !== uid)) {
+        userService.getUser(uid).then(setViewingUser);
+      }
+    }
+  }, [path, profile]);
 
   const [theme, setTheme] = useState<'light' | 'dark'>(
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
@@ -228,7 +251,8 @@ export default function App() {
   };
 
   const handleNavigate = (page: string) => {
-    setActivePage(page);
+    if (page === 'home') navigate('/');
+    else navigate(`/${page}`);
     if (page !== 'profile') {
       setViewingUser(null);
     }
@@ -238,11 +262,12 @@ export default function App() {
   const handleViewProfile = async (userId: string) => {
     if (userId === profile?.uid) {
       setViewingUser(null);
+      navigate('/profile');
     } else {
       const userToView = await userService.getUser(userId);
       setViewingUser(userToView);
+      navigate(`/profile/${userId}`);
     }
-    setActivePage('profile');
     window.scrollTo(0, 0);
   };
 
@@ -265,13 +290,13 @@ export default function App() {
 
   if (authError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="min-h-screen flex items-center justify-center bg-(--bg-main) p-4">
+        <div className="max-w-md w-full glass-card p-8 text-center">
+          <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Settings size={32} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Authentication Error</h2>
-          <p className="text-gray-600 mb-6">{authError}</p>
+          <h2 className="text-2xl font-bold text-(--text-primary) mb-2">Authentication Error</h2>
+          <p className="text-(--text-secondary) mb-6">{authError}</p>
           <button
             onClick={() => window.location.reload()}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors"
@@ -312,7 +337,6 @@ export default function App() {
         user={profile} 
         onNavigate={handleNavigate} 
         onViewProfile={handleViewProfile}
-        activePage={activePage} 
         unreadNotifications={unreadNotifications}
         friends={friends}
         onMessage={(user) => setActiveChat(user)}
@@ -511,28 +535,28 @@ export default function App() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Friends</h2>
+                <h2 className="text-2xl font-bold text-(--text-primary) mb-4">Your Friends</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {friends.map(friend => (
-                    <div key={friend.uid} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between group">
+                    <div key={friend.uid} className="glass-card p-4 flex items-center justify-between group">
                       <div className="flex items-center gap-3">
                         {friend.photoURL ? (
                           <img src={friend.photoURL} alt={friend.displayName} className="w-12 h-12 rounded-full object-cover" />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                          <div className="w-12 h-12 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
                             <UserIcon size={24} />
                           </div>
                         )}
                         <div>
-                          <h4 className="font-bold text-gray-900">{friend.displayName}</h4>
-                          <p className="text-xs text-gray-500">Friend</p>
+                          <h4 className="font-bold text-(--text-primary)">{friend.displayName}</h4>
+                          <p className="text-xs text-(--text-secondary)">Friend</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
                         <button 
                           onClick={() => {
                             setActiveChat(friend);
-                            setActivePage('messages');
+                            navigate('/messages');
                           }}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                           title="Message"
@@ -564,7 +588,7 @@ export default function App() {
                     </div>
                   ))}
                   {friends.length === 0 && (
-                    <div className="col-span-full bg-white p-12 text-center rounded-xl border border-gray-100 italic text-gray-400">
+                    <div className="col-span-full glass-card p-12 text-center italic text-(--text-secondary)">
                       You haven't added any friends yet.
                     </div>
                   )}
@@ -574,28 +598,28 @@ export default function App() {
           )}
 
           {activePage === 'messages' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 h-[600px] flex overflow-hidden">
-              <div className="w-1/3 border-r border-gray-100 flex flex-col">
-                <div className="p-4 border-b border-gray-100">
-                  <h2 className="font-bold text-xl">Chats</h2>
+            <div className="glass-card h-[600px] flex overflow-hidden">
+              <div className="w-1/3 border-r border-(--glass-border) flex flex-col">
+                <div className="p-4 border-b border-(--glass-border)">
+                  <h2 className="font-bold text-xl text-(--text-primary)">Chats</h2>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   {friends.map(friend => (
                     <button 
                       key={friend.uid}
                       onClick={() => setActiveChat(friend)}
-                      className={`w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors ${activeChat?.uid === friend.uid ? 'bg-blue-50' : ''}`}
+                      className={`w-full flex items-center gap-3 p-4 hover:bg-(--fb-hover) transition-colors ${activeChat?.uid === friend.uid ? 'bg-(--brand-primary)/10' : ''}`}
                     >
                       {friend.photoURL ? (
                         <img src={friend.photoURL} alt={friend.displayName} className="w-10 h-10 rounded-full object-cover" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <div className="w-10 h-10 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
                           <UserIcon size={20} />
                         </div>
                       )}
                       <div className="text-left">
-                        <h4 className="font-bold text-sm text-gray-900">{friend.displayName}</h4>
-                        <p className="text-xs text-gray-500 truncate">Click to chat</p>
+                        <h4 className="font-bold text-sm text-(--text-primary)">{friend.displayName}</h4>
+                        <p className="text-xs text-(--text-secondary) truncate">Click to chat</p>
                       </div>
                     </button>
                   ))}
@@ -610,8 +634,8 @@ export default function App() {
                     onStartCall={(type) => setActiveCall({ otherUser: activeChat, type, isIncoming: false })}
                   />
                 ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-8 text-center">
-                    <MessageSquare size={64} className="mb-4 opacity-20" />
+                  <div className="flex-1 flex flex-col items-center justify-center text-(--text-secondary) p-8 text-center opacity-60">
+                    <MessageSquare size={64} className="mb-4 opacity-40" />
                     <h3 className="text-lg font-medium">Select a friend to start chatting</h3>
                   </div>
                 )}
@@ -633,22 +657,22 @@ export default function App() {
 
           {activePage === 'notifications' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">Notifications</h2>
+              <h2 className="text-2xl font-bold text-(--text-primary)">Notifications</h2>
               <NotificationList notifications={notifications} />
             </div>
           )}
 
           {['video', 'marketplace', 'groups'].includes(activePage) && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-              <div className="w-20 h-20 bg-blue-50 text-[#1877F2] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="glass-card p-12 text-center">
+              <div className="w-20 h-20 bg-(--brand-primary)/10 text-(--brand-primary) rounded-full flex items-center justify-center mx-auto mb-4">
                 {activePage === 'video' && <Play size={40} fill="currentColor" />}
                 {activePage === 'marketplace' && <Store size={40} fill="currentColor" />}
                 {activePage === 'groups' && <LayoutGrid size={40} fill="currentColor" />}
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">{activePage}</h2>
-              <p className="text-gray-500">This feature is coming soon to SocialConnect!</p>
+              <h2 className="text-2xl font-bold text-(--text-primary) mb-2 capitalize">{activePage}</h2>
+              <p className="text-(--text-secondary)">This feature is coming soon to SocialConnect!</p>
               <button 
-                onClick={() => handleNavigate('home')}
+                onClick={() => navigate('/')}
                 className="mt-6 px-6 py-2 bg-[#1877F2] text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Back to Feed
@@ -673,7 +697,7 @@ export default function App() {
                   key={friend.uid}
                   onClick={() => {
                     setActiveChat(friend);
-                    setActivePage('messages');
+                    navigate('/messages');
                   }}
                   className="w-full flex items-center gap-3 p-2 hover:bg-(--fb-hover) rounded-xl transition-all duration-300 group"
                 >
