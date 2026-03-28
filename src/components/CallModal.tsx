@@ -26,9 +26,27 @@ export function CallModal({ currentUser, otherUser, callType, isIncoming, incomi
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const callId = useRef<string | null>(incomingCallData?.id || null);
 
+  const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
+
   const servers = {
     iceServers: [
       { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+      // Free TURN servers for cross-network relay
+      {
+        urls: 'turn:openrelay.metered.ca:80',
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
+      {
+        urls: 'turn:openrelay.metered.ca:443',
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
+      {
+        urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
     ],
     iceCandidatePoolSize: 10,
   };
@@ -103,7 +121,7 @@ export function CallModal({ currentUser, otherUser, callType, isIncoming, incomi
       callId.current = id;
       console.log('Call started with ID:', id);
 
-      // Handle ICE candidates - only add if we have a remote description
+      // Handle ICE candidates — queue any that arrive before remote description is set
       pc.onicecandidate = (event) => {
         if (event.candidate && id) {
           console.log('Sending ICE candidate');
@@ -111,14 +129,13 @@ export function CallModal({ currentUser, otherUser, callType, isIncoming, incomi
         }
       };
 
-      callService.listenForIceCandidates(id, currentUser.uid, (candidate) => {
+      callService.listenForIceCandidates(id, currentUser.uid, async (candidate) => {
         if (pc.remoteDescription && pc.signalingState !== 'closed') {
           console.log('Adding received ICE candidate');
           pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.error('Error adding ICE candidate:', e));
-        } else if (!pc.remoteDescription) {
+        } else {
           console.log('Queuing ICE candidate - remote description not set yet');
-          // Actually, pc.addIceCandidate will fail if remoteDescription is not set
-          // We should ideally queue it, but simply waiting for it to be set in the listener is often enough if the signaling is fast
+          pendingCandidates.current.push(candidate);
         }
       });
 
@@ -128,6 +145,11 @@ export function CallModal({ currentUser, otherUser, callType, isIncoming, incomi
           console.log('Received answer, setting remote description');
           const answerDescription = new RTCSessionDescription(data.answer);
           await pc.setRemoteDescription(answerDescription);
+          // Flush any queued ICE candidates now that remote description is set
+          for (const candidate of pendingCandidates.current) {
+            pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.error('Error flushing ICE candidate:', e));
+          }
+          pendingCandidates.current = [];
           setStatus('connected');
         } else if (data.status === 'rejected' || data.status === 'ended') {
           handleEndCall();
