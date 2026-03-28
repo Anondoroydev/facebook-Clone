@@ -3,26 +3,67 @@ import {
   addDoc, 
   query, 
   where, 
-  orderBy, 
   onSnapshot, 
   updateDoc, 
   doc, 
   or,
-  and,
   setDoc
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType, auth } from '../firebase';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { db, storage, handleFirestoreError, OperationType, auth } from '../firebase';
 import { Message } from '../types';
 
 export const chatService = {
-  sendMessage: async (senderId: string, receiverId: string, content: string) => {
+  /**
+   * Upload an image or video file to Firebase Storage and return its download URL.
+   * @param file - The File object to upload
+   * @param senderId - UID of the sender (used in the storage path)
+   * @param onProgress - Optional callback for upload progress (0–100)
+   */
+  uploadChatMedia: (
+    file: File,
+    senderId: string,
+    onProgress?: (progress: number) => void
+  ): Promise<{ url: string; mediaType: 'image' | 'video' }> => {
+    return new Promise((resolve, reject) => {
+      const mediaType: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image';
+      const timestamp = Date.now();
+      const storageRef = ref(storage, `chat-media/${senderId}/${timestamp}_${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress?.(Math.round(progress));
+        },
+        (error) => {
+          console.error('Media upload error:', error);
+          reject(error);
+        },
+        async () => {
+          const url = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve({ url, mediaType });
+        }
+      );
+    });
+  },
+
+  sendMessage: async (
+    senderId: string,
+    receiverId: string,
+    content: string,
+    mediaUrl?: string,
+    mediaType?: 'image' | 'video'
+  ) => {
     const path = 'messages';
-    console.log('Sending message:', { senderId, receiverId, content });
+    console.log('Sending message:', { senderId, receiverId, content, mediaUrl, mediaType });
     try {
       const docRef = await addDoc(collection(db, 'messages'), {
         senderId,
         receiverId,
         content,
+        ...(mediaUrl ? { mediaUrl, mediaType } : {}),
         createdAt: new Date().toISOString(),
         read: false
       });
@@ -37,15 +78,7 @@ export const chatService = {
   getMessages: (userId: string, otherId: string, callback: (messages: Message[]) => void) => {
     const path = 'messages';
     console.log('Fetching messages for:', { userId, otherId });
-    
-    // Firestore requires a composite index for complex OR queries with orderBy.
-    // To avoid index issues, we can fetch all messages involving the user and filter locally,
-    // or use two separate queries and merge them. Given the typical size of chat histories,
-    // fetching all messages for the user and filtering is often simpler if indexes aren't set up.
-    // However, a better approach without complex indexes is to query by a combined ID or just
-    // fetch messages where sender is userId OR receiver is userId, then filter.
-    
-    // For now, let's try a simpler query that might not need a complex index if we sort client-side
+
     const q = query(
       collection(db, 'messages'),
       or(
@@ -57,7 +90,6 @@ export const chatService = {
     return onSnapshot(q, (snapshot) => {
       const allMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message));
       
-      // Filter for this specific chat and sort client-side
       const chatMessages = allMessages
         .filter(msg => 
           (msg.senderId === userId && msg.receiverId === otherId) ||

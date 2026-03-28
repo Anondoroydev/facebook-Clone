@@ -9,6 +9,8 @@ export interface UserProfile {
   role: 'admin' | 'user';
   friends: string[];
   createdAt: string;
+  isBlocked?: boolean;
+  restrictedUntil?: string | null; // ISO date string – user cannot post/login until this date
 }
 
 export interface Post {
@@ -39,6 +41,8 @@ export interface Message {
   senderId: string;
   receiverId: string;
   content: string;
+  mediaUrl?: string;
+  mediaType?: 'image' | 'video';
   createdAt: string;
   read: boolean;
 }

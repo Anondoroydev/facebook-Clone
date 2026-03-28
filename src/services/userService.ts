@@ -202,6 +202,89 @@ export const userService = {
       const activeFriends = snapshot.docs.map(doc => doc.data() as UserProfile);
       callback(activeFriends);
     });
+  },
+
+  // ─── Admin-only functions ─────────────────────────────────────────────────
+
+  /** Block a user: sets isBlocked = true and status = offline */
+  blockUser: async (userId: string) => {
+    const path = `users/${userId}`;
+    try {
+      await updateDoc(doc(db, 'users', userId), { isBlocked: true, status: 'offline' });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  /** Unblock a user: sets isBlocked = false */
+  unblockUser: async (userId: string) => {
+    const path = `users/${userId}`;
+    try {
+      await updateDoc(doc(db, 'users', userId), { isBlocked: false });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  /** Mark user as deleted by disabling their account record (soft delete via isBlocked + role reset) */
+  deleteUser: async (userId: string) => {
+    const path = `users/${userId}`;
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        isBlocked: true,
+        role: 'user',
+        status: 'offline',
+        displayName: '[Removed User]',
+        photoURL: '',
+        bio: ''
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+    }
+  },
+
+  /** Promote user to admin or demote to user */
+  setUserRole: async (userId: string, role: 'admin' | 'user') => {
+    const path = `users/${userId}`;
+    try {
+      await updateDoc(doc(db, 'users', userId), { role });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  /**
+   * Restrict a user for a number of days (1, 2, 3, or 30).
+   * Sets restrictedUntil to a future ISO date string.
+   */
+  restrictUser: async (userId: string, days: number) => {
+    const path = `users/${userId}`;
+    try {
+      const until = new Date();
+      until.setDate(until.getDate() + days);
+      await updateDoc(doc(db, 'users', userId), { restrictedUntil: until.toISOString() });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  /** Remove any active restriction from a user */
+  removeRestriction: async (userId: string) => {
+    const path = `users/${userId}`;
+    try {
+      await updateDoc(doc(db, 'users', userId), { restrictedUntil: null });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  /** Real-time listener for all users (admin use) */
+  listenToAllUsers: (callback: (users: UserProfile[]) => void) => {
+    const q = query(collection(db, 'users'));
+    return onSnapshot(q, (snapshot) => {
+      const users = snapshot.docs.map(d => d.data() as UserProfile);
+      callback(users);
+    });
   }
 };
 
