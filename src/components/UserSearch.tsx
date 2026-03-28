@@ -44,11 +44,11 @@ export const UserSearch: React.FC<UserSearchProps> = ({ currentUser }) => {
 
       <form onSubmit={handleSearch} className="flex gap-2">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary)" size={18} />
           <input
             type="text"
             placeholder="Search for people to add..."
-            className="w-full bg-gray-100 rounded-lg py-2 pl-10 pr-4 outline-none focus:bg-gray-200 transition-colors text-sm"
+            className="w-full bg-(--bg-input) text-(--text-primary) border border-transparent rounded-lg py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-(--brand-primary)/50 focus:border-(--glass-border) transition-all text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -56,7 +56,7 @@ export const UserSearch: React.FC<UserSearchProps> = ({ currentUser }) => {
         <button
           type="submit"
           disabled={isSearching}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+          className="bg-(--brand-gradient) text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all shadow-sm"
         >
           {isSearching ? <Loader2 size={18} className="animate-spin" /> : 'Search'}
         </button>
@@ -65,29 +65,29 @@ export const UserSearch: React.FC<UserSearchProps> = ({ currentUser }) => {
       {results.length > 0 && (
         <div className="mt-4 space-y-3">
           {results.map(user => (
-            <div key={user.uid} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-colors">
+            <div key={user.uid} className="flex items-center justify-between p-2 hover:bg-(--fb-hover) rounded-lg transition-colors border border-transparent hover:border-(--glass-border)">
               <div className="flex items-center gap-3">
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full object-cover" />
+                  <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full object-cover shadow-sm" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <div className="w-10 h-10 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
                     <UserIcon size={18} />
                   </div>
                 )}
                 <div>
-                  <h4 className="font-bold text-sm text-gray-900">{user.displayName}</h4>
-                  <p className="text-[10px] text-gray-500">{user.email}</p>
+                  <h4 className="font-bold text-sm text-(--text-primary)">{user.displayName}</h4>
+                  <p className="text-[10px] text-(--text-secondary)">{user.email}</p>
                 </div>
               </div>
               
               {sentRequests.includes(user.uid) ? (
-                <button disabled className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-50 px-3 py-1.5 rounded-full">
+                <button disabled className="flex items-center gap-1 text-green-600 text-xs font-bold bg-green-500/10 px-3 py-1.5 rounded-full">
                   <Check size={14} /> Sent
                 </button>
               ) : (
                 <button
                   onClick={() => handleAddFriend(user.uid)}
-                  className="flex items-center gap-1 text-blue-600 text-xs font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+                  className="flex items-center gap-1 text-(--brand-primary) text-xs font-bold bg-(--brand-primary)/10 hover:bg-(--brand-primary) hover:text-white px-3 py-1.5 rounded-full transition-colors"
                 >
                   <UserPlus size={14} /> Add Friend
                 </button>

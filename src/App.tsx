@@ -330,7 +330,7 @@ export default function App() {
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-(--bg-main) pt-[72px] pb-[80px] md:pb-8 text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary) overflow-x-hidden w-full max-w-[100vw]">
+    <div className="h-screen overflow-hidden flex flex-col bg-(--bg-main) pt-[72px] pb-[80px] md:pb-0 text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary) w-full max-w-[100vw]">
 
 
       <Navbar 
@@ -346,9 +346,9 @@ export default function App() {
       />
 
 
-      <main className="w-full max-w-[1920px] mx-auto px-0 md:px-4 xl:px-12 py-2 md:py-8 grid grid-cols-1 lg:grid-cols-12 gap-0 md:gap-8 overflow-hidden">
+      <main className="flex-1 w-full max-w-[1920px] mx-auto px-0 md:px-4 xl:px-12 py-2 md:py-6 grid grid-cols-1 lg:grid-cols-12 gap-0 md:gap-8 h-full overflow-hidden">
         {/* Left Sidebar - Profile & Navigation */}
-        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-3 overflow-y-auto sticky top-24 h-[calc(100vh-120px)] pr-4 scrollbar-hide glass-card bg-(--bg-sidebar)! p-4">
+        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-3 overflow-y-auto h-full pb-20 pr-4 scrollbar-hide glass-card bg-(--bg-sidebar)! p-4">
 
           {/* Profile Link */}
           <button 
@@ -416,7 +416,7 @@ export default function App() {
         </div>
 
         {/* Main Content Area */}
-        <div className="min-w-0 lg:col-span-6 xl:col-span-6 space-y-3 md:space-y-6 w-full mx-auto">
+        <div className="min-w-0 lg:col-span-6 xl:col-span-6 space-y-3 md:space-y-6 w-full mx-auto h-full overflow-y-auto scrollbar-hide pb-24 md:pb-8 px-1">
           {/* ... existing content ... */}
           {activePage === 'home' && (
             <>
@@ -682,7 +682,7 @@ export default function App() {
         </div>
 
         {/* Right Sidebar - Active & Suggestions */}
-        <div className="hidden xl:block xl:col-span-3 space-y-6 sticky top-24 h-[calc(100vh-120px)] overflow-y-auto pr-4 scrollbar-hide">
+        <div className="hidden xl:block xl:col-span-3 space-y-6 h-full pb-20 overflow-y-auto pl-2 pr-4 scrollbar-hide">
           {/* Active Friends */}
           <div className="glass-card p-5 border border-(--glass-border) shadow-xl shadow-black/5">
             <div className="flex items-center justify-between mb-4">

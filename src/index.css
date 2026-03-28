@@ -61,7 +61,6 @@ body {
   font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-x: hidden;
 }
 
 @layer components {
@@ -119,4 +118,13 @@ body {
   animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Hide scrollbars globally but keep scroll functionality */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
 
