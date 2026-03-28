@@ -3,6 +3,7 @@ import { UserProfile } from '../types';
 import { userService } from '../services/userService';
 import { X, Camera, Loader2, User as UserIcon } from 'lucide-react';
 import { compressImage } from '../utils/imageUtils';
+import { postService } from '../services/postService';
 
 interface EditProfileProps {
   user: UserProfile;
@@ -25,6 +26,29 @@ export function EditProfile({ user, onClose, onUpdate, theme, onToggleTheme }: E
     try {
       const updatedData = { displayName, bio, photoURL, coverPhotoURL };
       await userService.updateProfile(user.uid, updatedData);
+
+      // Auto-post if photo changed
+      if (photoURL && photoURL !== user.photoURL) {
+        await postService.createPost(
+          user.uid,
+          updatedData.displayName,
+          updatedData.photoURL,
+          "Updated their profile picture",
+          updatedData.photoURL
+        );
+      }
+      
+      // Auto-post if cover photo changed
+      if (coverPhotoURL && coverPhotoURL !== user.coverPhotoURL) {
+        await postService.createPost(
+          user.uid,
+          updatedData.displayName,
+          updatedData.photoURL,
+          "Updated their cover photo",
+          updatedData.coverPhotoURL
+        );
+      }
+
       onUpdate({ ...user, ...updatedData });
       onClose();
     } catch (error) {

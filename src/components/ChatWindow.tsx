@@ -9,9 +9,12 @@ interface ChatWindowProps {
   otherUser: UserProfile;
   onClose: () => void;
   onStartCall?: (type: 'audio' | 'video') => void;
+  onViewProfile?: (userId: string) => void;
+  /** When true, renders as a flex-filling inline panel instead of fixed overlay */
+  inline?: boolean;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, onClose, onStartCall }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, onClose, onStartCall, onViewProfile, inline = false }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
@@ -123,12 +126,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
 
   return (
     <div
-      className="fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 bg-(--bg-card) md:glass-card rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-(--glass-border) flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300"
-      style={{ backdropFilter: 'none' }}
+      className={inline
+        ? 'flex flex-col h-full w-full bg-(--bg-card) border-0'
+        : 'fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 bg-(--bg-card) md:glass-card rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-(--glass-border) flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300'
+      }
+      style={inline ? {} : { backdropFilter: 'none' }}
     >
       {/* Header */}
-      <div className="p-3 border-b border-(--glass-border) flex items-center justify-between bg-(--brand-primary) text-white rounded-t-xl">
-        <div className="flex items-center gap-2">
+      <div className="p-3 border-b border-(--glass-border) flex items-center justify-between bg-(--brand-primary) text-white rounded-t-xl shrink-0">
+        <button 
+          onClick={() => onViewProfile?.(otherUser.uid)}
+          className="flex items-center gap-2 hover:bg-white/10 p-1.5 -ml-1.5 rounded-lg transition-colors text-left"
+        >
           <div className="relative">
             {otherUser.photoURL ? (
               <img src={otherUser.photoURL} alt={otherUser.displayName} className="w-8 h-8 rounded-full object-cover" />
@@ -145,7 +154,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
               {isOtherUserTyping ? 'Typing...' : 'Active now'}
             </p>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-2">
           <button onClick={() => onStartCall?.('audio')} className="p-2 md:p-1.5 hover:bg-white/10 rounded-full transition-colors">
             <Phone size={20} />
@@ -249,7 +258,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isSending}
-          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors disabled:opacity-40 flex-shrink-0"
+          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors disabled:opacity-40 shrink-0"
           title="Send image or video"
         >
           <ImagePlus size={20} />
@@ -267,7 +276,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
         <button
           type="submit"
           disabled={isSending || (!inputText.trim() && !selectedFile)}
-          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors disabled:text-(--text-secondary) disabled:opacity-50 flex-shrink-0"
+          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors disabled:text-(--text-secondary) disabled:opacity-50 shrink-0"
         >
           {isSending ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
         </button>

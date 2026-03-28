@@ -32,6 +32,8 @@ interface NavbarProps {
   friends: UserProfile[];
   onMessage: (user: UserProfile) => void;
   onStartCall?: (user: UserProfile, type: 'audio' | 'video') => void;
+  onNavigate?: (page: string) => void;
+  onViewProfile?: (userId: string) => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
 }

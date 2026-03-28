@@ -110,11 +110,6 @@ export default function App() {
     }
   }, [profile]);
 
-  useEffect(() => {
-    if (profile) {
-      console.log('Profile loaded, friends:', profile.friends);
-    }
-  }, [profile, friends]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -271,7 +266,7 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
-  console.log('App rendering, user:', user?.uid, 'profile:', profile?.uid, 'loading:', loading);
+
 
   if (loading) {
     return (
@@ -280,7 +275,7 @@ export default function App() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full" />
         {/* Logo */}
         <div className="relative animate-pulse">
-          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
+          <div className="w-24 h-24 rounded-3xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
             <span className="text-white text-5xl font-black italic">S</span>
           </div>
         </div>
@@ -604,66 +599,90 @@ export default function App() {
           )}
 
           {activePage === 'messages' && (
-            <div className="glass-card h-[600px] flex overflow-hidden">
-              <div className="w-1/3 border-r border-(--glass-border) flex flex-col">
-                <div className="p-4 border-b border-(--glass-border)">
+            <div className="glass-card flex overflow-hidden" style={{ height: 'calc(100vh - 160px)' }}>
+              {/* Left: Friend list */}
+              <div className="w-72 shrink-0 border-r border-(--glass-border) flex flex-col">
+                <div className="p-4 border-b border-(--glass-border) shrink-0">
                   <h2 className="font-bold text-xl text-(--text-primary)">Chats</h2>
                 </div>
                 <div className="flex-1 overflow-y-auto">
+                  {friends.length === 0 && (
+                    <div className="p-6 text-center text-(--text-secondary) text-sm italic">No friends yet</div>
+                  )}
                   {friends.map(friend => (
                     <div
                       key={friend.uid}
-                      className={`flex items-center gap-2 p-3 hover:bg-(--fb-hover) transition-colors cursor-pointer ${activeChat?.uid === friend.uid ? 'bg-(--brand-primary)/10' : ''}`}
+                      className={`flex items-center gap-2 p-3 hover:bg-(--fb-hover) transition-colors cursor-pointer border-b border-(--glass-border)/40 last:border-0 ${activeChat?.uid === friend.uid ? 'bg-(--brand-primary)/10' : ''}`}
                     >
                       <button
                         onClick={() => setActiveChat(friend)}
                         className="flex items-center gap-2 flex-1 min-w-0 text-left"
                       >
-                        {friend.photoURL ? (
-                          <img src={friend.photoURL} alt={friend.displayName} className="w-10 h-10 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary) shrink-0">
-                            <UserIcon size={20} />
-                          </div>
-                        )}
+                        <div 
+                          className="relative shrink-0 hover:opacity-80 transition-opacity"
+                          onClick={(e) => { e.stopPropagation(); handleViewProfile(friend.uid); }}
+                        >
+                          {friend.photoURL ? (
+                            <img src={friend.photoURL} alt={friend.displayName} className="w-10 h-10 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
+                              <UserIcon size={20} />
+                            </div>
+                          )}
+                          {friend.status === 'online' && (
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-(--bg-card) rounded-full" />
+                          )}
+                        </div>
                         <div className="text-left min-w-0">
-                          <h4 className="font-bold text-sm text-(--text-primary) truncate">{friend.displayName}</h4>
-                          <p className="text-xs text-(--text-secondary) truncate">Tap to chat</p>
+                          <h4 
+                            className="font-bold text-sm text-(--text-primary) truncate hover:text-(--brand-primary) hover:underline transition-colors"
+                            onClick={(e) => { e.stopPropagation(); handleViewProfile(friend.uid); }}
+                          >
+                            {friend.displayName}
+                          </h4>
+                          <p className="text-xs text-(--text-secondary) truncate">
+                            {friend.status === 'online' ? '🟢 Online' : 'Tap to chat'}
+                          </p>
                         </div>
                       </button>
                       {/* Call buttons */}
                       <div className="flex gap-1 shrink-0">
                         <button
                           onClick={() => setActiveCall({ otherUser: friend, type: 'audio', isIncoming: false })}
-                          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors"
+                          className="p-1.5 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors"
                           title="Audio Call"
                         >
-                          <Phone size={16} />
+                          <Phone size={15} />
                         </button>
                         <button
                           onClick={() => setActiveCall({ otherUser: friend, type: 'video', isIncoming: false })}
-                          className="p-2 text-purple-500 hover:bg-purple-500/10 rounded-full transition-colors"
+                          className="p-1.5 text-purple-500 hover:bg-purple-500/10 rounded-full transition-colors"
                           title="Video Call"
                         >
-                          <Video size={16} />
+                          <Video size={15} />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="flex-1 flex flex-col relative">
+
+              {/* Right: Inline chat panel */}
+              <div className="flex-1 flex flex-col overflow-hidden relative">
                 {activeChat ? (
-                  <ChatWindow 
-                    currentUser={profile} 
-                    otherUser={activeChat} 
+                  <ChatWindow
+                    currentUser={profile}
+                    otherUser={activeChat}
                     onClose={() => setActiveChat(null)}
                     onStartCall={(type) => setActiveCall({ otherUser: activeChat, type, isIncoming: false })}
+                    onViewProfile={handleViewProfile}
+                    inline={true}
                   />
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center text-(--text-secondary) p-8 text-center opacity-60">
                     <MessageSquare size={64} className="mb-4 opacity-40" />
                     <h3 className="text-lg font-medium">Select a friend to start chatting</h3>
+                    <p className="text-sm mt-1">Choose from the list on the left</p>
                   </div>
                 )}
               </div>
@@ -728,7 +747,10 @@ export default function App() {
                   }}
                   className="w-full flex items-center gap-3 p-2 hover:bg-(--fb-hover) rounded-xl transition-all duration-300 group"
                 >
-                  <div className="relative">
+                  <div 
+                    className="relative shrink-0 hover:opacity-80 transition-opacity"
+                    onClick={(e) => { e.stopPropagation(); handleViewProfile(friend.uid); }}
+                  >
                     {friend.photoURL ? (
                       <img src={friend.photoURL} alt="" className="w-10 h-10 rounded-xl object-cover shadow-sm" />
                     ) : (
@@ -739,7 +761,12 @@ export default function App() {
                     <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-2 border-(--bg-card) rounded-full" />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="font-black text-[14px] text-(--text-primary) truncate tracking-tight">{friend.displayName}</p>
+                    <p 
+                      className="font-black text-[14px] text-(--text-primary) truncate tracking-tight hover:text-(--brand-primary) hover:underline transition-colors"
+                      onClick={(e) => { e.stopPropagation(); handleViewProfile(friend.uid); }}
+                    >
+                      {friend.displayName}
+                    </p>
                     <p className="text-[11px] font-bold text-green-500 uppercase tracking-tighter">Online Now</p>
                   </div>
                 </button>
@@ -847,6 +874,7 @@ export default function App() {
           otherUser={activeChat} 
           onClose={() => setActiveChat(null)} 
           onStartCall={(type) => setActiveCall({ otherUser: activeChat, type, isIncoming: false })}
+          onViewProfile={handleViewProfile}
         />
       )}
     </div>
