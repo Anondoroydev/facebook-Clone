@@ -191,12 +191,30 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
       )}
 
       {post.videoUrl && (
-        <div className="w-full max-h-[600px] overflow-hidden bg-black border-y border-(--divider)/30">
+        <div className="w-full max-h-[600px] overflow-hidden bg-black border-y border-(--divider)/30 relative group">
           <video 
             src={post.videoUrl} 
             controls 
             className="w-full h-full max-h-[600px] object-contain"
+            playsInline
           />
+          {/* Fullscreen / Phone button */}
+          <button
+            onClick={(e) => {
+              const video = (e.currentTarget.previousElementSibling as HTMLVideoElement);
+              if (video) {
+                if (video.requestFullscreen) video.requestFullscreen();
+                else if ((video as any).webkitEnterFullscreen) (video as any).webkitEnterFullscreen();
+              }
+            }}
+            className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 backdrop-blur-sm text-white rounded-xl px-3 py-1.5 text-xs font-bold flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 border border-white/10"
+            title="Watch fullscreen"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+            Fullscreen
+          </button>
         </div>
       )}
 

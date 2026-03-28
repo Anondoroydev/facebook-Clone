@@ -82,7 +82,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
   };
 
   return (
-    <div className="fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 glass-card rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-(--glass-border) flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 bg-(--bg-card) md:glass-card rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-(--glass-border) flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300" style={{ backdropFilter: 'none' }}>
 
       {/* Header */}
       <div className="p-3 border-b border-(--glass-border) flex items-center justify-between bg-(--brand-primary) text-white rounded-t-xl">
