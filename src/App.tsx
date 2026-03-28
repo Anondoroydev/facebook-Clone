@@ -800,21 +800,23 @@ export default function App() {
         )}
 
 
-        {activeCall && (
-          <CallModal
-            currentUser={profile}
-            otherUser={activeCall.otherUser}
-            callType={activeCall.type}
-            isIncoming={activeCall.isIncoming}
-            incomingCallData={incomingCall || undefined}
-            onClose={() => {
-              setActiveCall(null);
-              setIncomingCall(null);
-            }}
-          />
-        )}
 
       </main>
+
+      {/* Call Modal — outside main to avoid overflow:hidden clipping on mobile */}
+      {activeCall && (
+        <CallModal
+          currentUser={profile}
+          otherUser={activeCall.otherUser}
+          callType={activeCall.type}
+          isIncoming={activeCall.isIncoming}
+          incomingCallData={incomingCall || undefined}
+          onClose={() => {
+            setActiveCall(null);
+            setIncomingCall(null);
+          }}
+        />
+      )}
 
 
       {/* Floating Chat Windows */}
