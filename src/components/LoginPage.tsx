@@ -1,12 +1,28 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  createUserWithEmailAndPassword, 
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword
 } from 'firebase/auth';
-import { LogIn, UserPlus, Mail, Lock, Chrome, X } from 'lucide-react';
+import { Mail, Lock, X, Loader2, Zap, Users, Heart, Globe } from 'lucide-react';
+
+const GoogleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
+
+const features = [
+  { icon: Users, text: 'Connect with friends & family' },
+  { icon: Heart, text: 'Share your life moments' },
+  { icon: Zap, text: 'Real-time chat & calls' },
+  { icon: Globe, text: 'Discover new communities' },
+];
 
 export const LoginPage: React.FC = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -48,115 +64,211 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-(--bg-main) flex items-center justify-center p-6 transition-colors duration-500 selection:bg-(--brand-primary)/20 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-(--brand-primary)/10 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-(--brand-secondary)/10 blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-[#020617] flex overflow-hidden relative select-none">
+      {/* Animated blobs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 blur-[160px] rounded-full animate-pulse" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 blur-[160px] rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-500/10 blur-[100px] rounded-full" />
 
-      <div className="max-w-[1240px] w-full flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-24 relative z-10">
+      {/* Grid overlay */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+        backgroundSize: '60px 60px'
+      }} />
 
-        {/* Left Side: Brand info */}
-        <div className="flex-1 text-center lg:text-left">
-          <div className="w-20 h-20 bg-(--brand-gradient) rounded-3xl flex items-center justify-center text-white shadow-2xl shadow-blue-500/30 mb-8 mx-auto lg:mx-0">
-            <span className="text-5xl font-black tracking-tighter italic">S</span>
+      <div className="relative z-10 flex flex-col lg:flex-row w-full min-h-screen">
+
+        {/* Left Panel */}
+        <div className="hidden lg:flex flex-1 flex-col justify-center px-16 xl:px-24">
+          {/* Logo */}
+          <div className="flex items-center gap-4 mb-16">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-blue-500/40">
+              <span className="text-white text-2xl font-black italic">S</span>
+            </div>
+            <span className="text-white text-2xl font-black tracking-tight">SocialConnect</span>
           </div>
-          <h1 className="text-6xl lg:text-8xl font-black mb-8 tracking-tight bg-(--brand-gradient) bg-clip-text text-transparent leading-none">
-            Connect.<br />Share.<br />Enjoy.
+
+          {/* Headline */}
+          <h1 className="text-7xl xl:text-8xl font-black text-white leading-[1.05] tracking-tight mb-8">
+            Connect.<br />
+            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Share.</span><br />
+            Belong.
           </h1>
-          <p className="text-(--text-secondary) text-xl lg:text-2xl leading-relaxed font-medium max-w-[500px]">
-            SocialConnect helps you bridge the gap with the people you care about most.
+
+          <p className="text-white/50 text-xl leading-relaxed font-medium mb-16 max-w-[460px]">
+            Join millions of people who use SocialConnect to stay in touch with the people they love.
           </p>
+
+          {/* Feature pills */}
+          <div className="space-y-4">
+            {features.map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-4 group">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:border-blue-500/30 transition-all">
+                  <Icon size={18} className="text-blue-400" />
+                </div>
+                <span className="text-white/60 font-medium">{text}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
+        {/* Right Panel: Auth Card */}
+        <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
+          <div className="w-full max-w-[420px]">
 
-        {/* Right Side: Login Card */}
-        <div className="flex-1 max-w-[440px] w-full">
-          <div className="glass-card shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] p-8 border border-(--glass-border) animate-fade-in">
+            {/* Mobile logo */}
+            <div className="flex items-center gap-3 mb-10 lg:hidden justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl">
+                <span className="text-white text-xl font-black italic">S</span>
+              </div>
+              <span className="text-white text-xl font-black tracking-tight">SocialConnect</span>
+            </div>
 
-            <form onSubmit={handleEmailAuth} className="space-y-4">
-              <input
-                type="email"
-                placeholder="Email address"
-                className="w-full premium-input h-14"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full premium-input h-14"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            {/* Card */}
+            <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_32px_80px_-12px_rgba(0,0,0,0.6)]">
+              <h2 className="text-3xl font-black text-white mb-1">Welcome back</h2>
+              <p className="text-white/40 text-sm mb-8 font-medium">Sign in to continue your journey</p>
 
-              {error && (
-                <div className="bg-red-50/50 backdrop-blur-sm border border-red-200/50 text-red-600 px-4 py-3 rounded-xl text-sm text-center font-medium">
-                  {error}
-                </div>
-              )}
-
+              {/* Google button */}
               <button
-                type="submit"
+                onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full premium-button text-lg h-14"
+                className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-800 font-bold py-4 rounded-2xl transition-all duration-200 mb-6 shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-70"
               >
-                {loading ? 'Entering...' : 'Sign In'}
+                {loading ? <Loader2 size={20} className="animate-spin text-blue-500" /> : <GoogleIcon />}
+                <span>Continue with Google</span>
               </button>
-              
-              <div className="text-center">
-                <button type="button" className="text-(--text-secondary) text-sm hover:text-(--brand-primary) transition-colors">Forgotten password?</button>
+
+              {/* Divider */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-white/30 text-sm font-medium">or</span>
+                <div className="flex-1 h-px bg-white/10" />
               </div>
 
-              <div className="border-t border-(--divider) my-8 pt-8 text-center">
+              {/* Email form */}
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="relative">
+                  <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    className="w-full bg-white/[0.07] border border-white/10 text-white placeholder-white/25 rounded-2xl py-4 pl-11 pr-4 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all text-sm font-medium"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    className="w-full bg-white/[0.07] border border-white/10 text-white placeholder-white/25 rounded-2xl py-4 pl-11 pr-4 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all text-sm font-medium"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm text-center font-medium">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 active:scale-[0.99] disabled:opacity-70 text-base mt-2"
+                >
+                  {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'Sign In'}
+                </button>
+              </form>
+
+              {/* Register */}
+              <div className="mt-6 text-center">
+                <span className="text-white/30 text-sm">Don't have an account? </span>
                 <button
                   type="button"
                   onClick={() => setIsRegister(true)}
-                  className="bg-(--bg-input) hover:bg-(--fb-hover) text-(--text-primary) font-bold py-4 px-10 rounded-xl text-[17px] transition-all border border-(--divider)"
+                  className="text-blue-400 text-sm font-bold hover:text-blue-300 transition-colors"
                 >
-                  Join SocialConnect Today
+                  Create one
                 </button>
               </div>
-            </form>
-
-            <div className="mt-6">
-              <button 
-                onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center gap-3 bg-white border border-(--divider) hover:bg-gray-50 text-(--text-primary) font-bold py-3.5 rounded-xl transition-all"
-              >
-                <Chrome size={20} className="text-blue-500" />
-                Continue with Google
-              </button>
             </div>
+
+            <p className="text-center text-white/20 text-xs mt-6 font-medium">
+              By signing in, you agree to our Terms & Privacy Policy.
+            </p>
           </div>
         </div>
       </div>
 
-      {isRegister && ( 
-        <div className="fixed inset-0 bg-(--bg-main)/70 backdrop-blur-md z-[100] flex items-center justify-center p-4"> 
-          <div className="max-w-[480px] w-full glass-card shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] overflow-hidden animate-in zoom-in-95 duration-300 border border-(--glass-border) p-8"> 
-            <div className="mb-8 flex items-center justify-between"> 
-              <div> 
-                <h2 className="text-4xl font-black text-(--text-primary) tracking-tight">Join Us</h2> 
-                <p className="text-[17px] text-(--text-secondary) font-medium">Create your SocialConnect account.</p> 
-              </div> 
-              <button onClick={() => setIsRegister(false)} className="text-(--text-secondary) hover:bg-(--fb-hover) p-2 rounded-full transition-colors"> 
-                <X size={28} /> 
-              </button> 
-            </div> 
-            <div> 
-              <form onSubmit={handleEmailAuth} className="space-y-6"> 
-                <input type="email" placeholder="Email address" className="w-full premium-input py-4 px-4 text-[16px] font-medium" value={email} onChange={(e) => setEmail(e.target.value)} required /> 
-                <input type="password" placeholder="New password" className="w-full premium-input py-4 px-4 text-[16px] font-medium" value={password} onChange={(e) => setPassword(e.target.value)} required /> 
-                <p className="text-[13px] text-(--text-secondary) leading-relaxed">By joining, you agree to our <span className="text-(--brand-primary) font-semibold cursor-pointer">Terms</span> and <span className="text-(--brand-primary) font-semibold cursor-pointer">Privacy Policy</span>.</p> 
-                <div className="pt-4"> 
-                  <button type="submit" className="w-full premium-button text-lg h-14">Start Connecting</button> 
-                </div> 
-              </form> 
-            </div> 
-          </div> 
-        </div> 
+      {/* Register Modal */}
+      {isRegister && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="w-full max-w-[420px] bg-[#0f172a] border border-white/10 rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-black text-white">Join Us</h2>
+                <p className="text-white/40 text-sm font-medium mt-1">Create your free account</p>
+              </div>
+              <button
+                onClick={() => setIsRegister(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/50 transition-colors border border-white/10"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEmailAuth} className="space-y-4">
+              <div className="relative">
+                <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  className="w-full bg-white/[0.07] border border-white/10 text-white placeholder-white/25 rounded-2xl py-4 pl-11 pr-4 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all text-sm font-medium"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="relative">
+                <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                <input
+                  type="password"
+                  placeholder="Choose a strong password"
+                  className="w-full bg-white/[0.07] border border-white/10 text-white placeholder-white/25 rounded-2xl py-4 pl-11 pr-4 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all text-sm font-medium"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm text-center font-medium">
+                  {error}
+                </div>
+              )}
+
+              <p className="text-white/25 text-xs leading-relaxed pt-1">
+                By joining, you agree to our <span className="text-blue-400 cursor-pointer">Terms</span> and <span className="text-blue-400 cursor-pointer">Privacy Policy</span>.
+              </p>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black py-4 rounded-2xl transition-all duration-200 shadow-lg shadow-blue-500/30 active:scale-[0.99] disabled:opacity-70 text-base"
+              >
+                {loading ? <Loader2 size={20} className="animate-spin mx-auto" /> : 'Start Connecting ✨'}
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

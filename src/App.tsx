@@ -275,12 +275,18 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
-        <p className="text-gray-500 font-medium">Loading SocialConnect...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#020617] relative overflow-hidden">
+        {/* background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full" />
+        {/* Logo */}
+        <div className="relative animate-pulse">
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
+            <span className="text-white text-5xl font-black italic">S</span>
+          </div>
+        </div>
         <button 
           onClick={() => auth.signOut()}
-          className="mt-8 text-sm text-gray-400 hover:text-gray-600 underline"
+          className="mt-16 text-xs text-white/15 hover:text-white/30 transition-colors"
         >
           Sign Out
         </button>
