@@ -611,23 +611,44 @@ export default function App() {
                 </div>
                 <div className="flex-1 overflow-y-auto">
                   {friends.map(friend => (
-                    <button 
+                    <div
                       key={friend.uid}
-                      onClick={() => setActiveChat(friend)}
-                      className={`w-full flex items-center gap-3 p-4 hover:bg-(--fb-hover) transition-colors ${activeChat?.uid === friend.uid ? 'bg-(--brand-primary)/10' : ''}`}
+                      className={`flex items-center gap-2 p-3 hover:bg-(--fb-hover) transition-colors cursor-pointer ${activeChat?.uid === friend.uid ? 'bg-(--brand-primary)/10' : ''}`}
                     >
-                      {friend.photoURL ? (
-                        <img src={friend.photoURL} alt={friend.displayName} className="w-10 h-10 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary)">
-                          <UserIcon size={20} />
+                      <button
+                        onClick={() => setActiveChat(friend)}
+                        className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                      >
+                        {friend.photoURL ? (
+                          <img src={friend.photoURL} alt={friend.displayName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary) shrink-0">
+                            <UserIcon size={20} />
+                          </div>
+                        )}
+                        <div className="text-left min-w-0">
+                          <h4 className="font-bold text-sm text-(--text-primary) truncate">{friend.displayName}</h4>
+                          <p className="text-xs text-(--text-secondary) truncate">Tap to chat</p>
                         </div>
-                      )}
-                      <div className="text-left">
-                        <h4 className="font-bold text-sm text-(--text-primary)">{friend.displayName}</h4>
-                        <p className="text-xs text-(--text-secondary) truncate">Click to chat</p>
+                      </button>
+                      {/* Call buttons */}
+                      <div className="flex gap-1 shrink-0">
+                        <button
+                          onClick={() => setActiveCall({ otherUser: friend, type: 'audio', isIncoming: false })}
+                          className="p-2 text-(--brand-primary) hover:bg-(--brand-primary)/10 rounded-full transition-colors"
+                          title="Audio Call"
+                        >
+                          <Phone size={16} />
+                        </button>
+                        <button
+                          onClick={() => setActiveCall({ otherUser: friend, type: 'video', isIncoming: false })}
+                          className="p-2 text-purple-500 hover:bg-purple-500/10 rounded-full transition-colors"
+                          title="Video Call"
+                        >
+                          <Video size={16} />
+                        </button>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>
