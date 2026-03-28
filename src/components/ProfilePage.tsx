@@ -152,22 +152,33 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
   return (
     <div className="max-w-[1280px] mx-auto bg-(--bg-main) min-h-screen transition-colors duration-500 pb-20">
       {/* Cover Photo & Header Section */}
-      <div className="glass-card shadow-2xl shadow-black/5 rounded-b-[40px] overflow-hidden border-b border-(--glass-border) mb-8">
+      <div className="glass-card shadow-2xl shadow-black/5 rounded-none md:rounded-b-[40px] overflow-hidden border-b border-(--glass-border) mb-4 md:mb-8">
 
         <div className="max-w-[1280px] mx-auto px-0 md:px-0">
-          <div className="h-[250px] md:h-[450px] bg-(--brand-gradient) relative group overflow-hidden">
+          <div 
+            className={`h-[250px] md:h-[450px] bg-(--brand-gradient) relative group overflow-hidden ${isOwnProfile ? 'cursor-pointer' : ''}`}
+            onClick={() => isOwnProfile && coverInputRef.current?.click()}
+          >
+            {user.coverPhotoURL ? (
+              <img 
+                src={user.coverPhotoURL} 
+                alt="Cover" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full bg-linear-to-r from-[#1877F2]/20 to-[#1877F2]/40 flex flex-col items-center justify-center gap-3">
+                <Camera size={48} className="text-(--brand-primary)/40" />
+                <p className="text-(--text-secondary) font-bold text-sm">Add a cover photo</p>
+              </div>
+            )}
 
-
-          {user.coverPhotoURL ? (
-            <img 
-              src={user.coverPhotoURL} 
-              alt="Cover" 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-linear-to-r from-[#1877F2]/20 to-[#1877F2]/40" />
-
-          )}
+            {isOwnProfile && (
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-md p-4 rounded-full text-white shadow-2xl scale-90 group-hover:scale-100 duration-300">
+                  <Camera size={32} />
+                </div>
+              </div>
+            )}
 
           {isUploading && (
             <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
@@ -176,12 +187,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
           )}
           
           {isOwnProfile && (
-            <div className="absolute bottom-4 right-4 flex gap-2">
+            <div className="absolute bottom-4 right-4 flex gap-2 z-30">
               <button 
-                onClick={() => coverInputRef.current?.click()}
-                className="bg-white px-3 py-2 rounded-lg shadow-md flex items-center gap-2 text-[15px] font-semibold hover:bg-[#F2F2F2] transition-colors text-[#050505]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  coverInputRef.current?.click();
+                }}
+                className="bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-[14px] font-black hover:bg-white transition-all text-[#050505] border border-white/20"
               >
-                <Camera size={18} /> {user.coverPhotoURL ? 'Edit cover photo' : 'Add cover photo'}
+                <Camera size={18} /> {user.coverPhotoURL ? 'Edit Cover Photo' : 'Add Cover Photo'}
               </button>
               <input 
                 type="file" 
@@ -197,10 +211,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
 
 
         {/* Profile Info Header */}
-        <div className="max-w-[1200px] mx-auto px-6 md:px-12 pb-8">
-          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-24 relative z-10">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-12 pb-6 md:pb-8">
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 -mt-20 md:-mt-24 relative z-10">
             <div className="relative group/profile shrink-0">
-              <div className="w-[180px] h-[180px] rounded-full border-[6px] border-(--bg-sidebar) bg-(--bg-card) shadow-2xl overflow-hidden flex items-center justify-center backdrop-blur-xl">
+              <div className="w-32 h-32 md:w-[180px] md:h-[180px] rounded-full border-4 md:border-[6px] border-(--bg-sidebar) bg-(--bg-card) shadow-2xl overflow-hidden flex items-center justify-center backdrop-blur-xl">
 
                 {user.photoURL ? (
                   <img 
@@ -228,7 +242,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
                     e.stopPropagation();
                     profileInputRef.current?.click();
                   }}
-                  className="absolute bottom-3 right-3 bg-[#E4E6EB] p-2.5 rounded-full hover:bg-[#D8DADF] transition-colors border-2 border-white shadow-sm z-20 cursor-pointer"
+                  className="absolute bottom-1 right-1 md:bottom-3 md:right-3 bg-[#E4E6EB] p-2 md:p-2.5 rounded-full hover:bg-[#D8DADF] transition-colors border-2 border-white shadow-sm z-20 cursor-pointer"
                   title="Update profile picture"
                 >
                   <Camera size={20} className="text-[#050505]" />
@@ -243,9 +257,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
               />
             </div>
             
-            <div className="text-center md:text-left flex-1 pb-4">
-              <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-1">
-                <h1 className="text-[32px] font-black text-(--fb-text-primary) tracking-tight leading-tight">{user.displayName}</h1>
+            <div className="text-center md:text-left flex-1 pb-2 md:pb-4">
+              <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-4 mb-1">
+                <h1 className="text-2xl md:text-[32px] font-black text-(--fb-text-primary) tracking-tight leading-tight">{user.displayName}</h1>
                 <p className="text-(--fb-text-secondary) font-bold text-[17px] hover:underline cursor-pointer">
                   {(user.friends || []).length} friends
                 </p>
@@ -264,7 +278,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
               </div>
             </div>
             
-            <div className="flex gap-2 pb-5">
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 pb-4 md:pb-5">
               {isOwnProfile ? (
                 <>
                   <button 

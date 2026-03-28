@@ -24,12 +24,10 @@ import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { UserProfile } from '../types';
 import { userService } from '../services/userService';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 interface NavbarProps {
   user: UserProfile | null;
-  onNavigate: (page: string) => void;
-  onViewProfile: (userId: string) => void;
-  activePage: string;
   unreadNotifications?: number;
   friends: UserProfile[];
   onMessage: (user: UserProfile) => void;
@@ -41,9 +39,6 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   user, 
-  onNavigate, 
-  onViewProfile, 
-  activePage, 
   unreadNotifications = 0,
   friends,
   onMessage,
@@ -51,6 +46,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   theme,
   onToggleTheme
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activePage = location.pathname === '/' ? 'home' : location.pathname.substring(1);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -122,23 +120,31 @@ export const Navbar: React.FC<NavbarProps> = ({
         {!isSearchOpen && (
           <div 
             className="w-11 h-11 bg-(--brand-gradient) rounded-2xl flex items-center justify-center cursor-pointer shadow-lg shadow-blue-500/20 transform hover:scale-105 transition-all active:scale-95 shrink-0" 
-            onClick={() => { onNavigate("home"); closeAllDropdowns(); }} 
+            onClick={() => { navigate("/"); closeAllDropdowns(); }} 
           > 
             <span className="text-white text-3xl font-black italic tracking-tighter">S</span> 
           </div>
         )}
         
         <div ref={searchRef} className={`relative flex-1 ${isSearchOpen ? 'w-full' : 'max-w-[280px]'}`}>
-          <div className={`flex items-center bg-(--bg-input) rounded-2xl px-3 md:px-4 py-2 md:py-2.5 gap-2 md:gap-3 w-full ${isSearchOpen ? "flex" : "hidden md:flex"} border border-transparent focus-within:border-(--brand-primary)/30 focus-within:bg-(--bg-card) focus-within:shadow-xl transition-all`}> 
-            {!isSearchOpen && <Search size={20} className="text-(--text-primary) opacity-70" />} 
+          <div className={`items-center bg-(--bg-input) rounded-2xl px-3 md:px-4 py-2 md:py-2.5 gap-2 md:gap-3 w-full ${isSearchOpen ? "flex" : "hidden md:flex"} border border-transparent focus-within:border-(--brand-primary)/30 focus-within:bg-(--bg-card) focus-within:shadow-xl transition-all`}> 
+            <Search size={20} className="text-(--text-primary) opacity-70 shrink-0" /> 
             <input 
               type="text" 
-              placeholder="Search SocialConnect" 
-              className="bg-transparent border-none outline-none text-[15px] w-full placeholder:text-(--text-secondary) text-(--text-primary) font-medium" 
+              placeholder="Search..." 
+              className="bg-transparent border-none outline-none text-[15px] w-full min-w-0 placeholder:text-(--text-secondary) text-(--text-primary) font-medium" 
               autoFocus={isSearchOpen} 
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)} 
             /> 
+            {isSearchOpen && (
+              <button 
+                className="md:hidden shrink-0 text-(--text-secondary) p-1 hover:bg-(--fb-hover) rounded-full"
+                onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
 
           {/* Search Results Dropdown */}
@@ -148,7 +154,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={result.uid}
                   onClick={() => {
-                    onViewProfile(result.uid);
+                    navigate(`/profile/${result.uid}`);
                     setSearchQuery('');
                     setSearchResults([]);
                     setIsSearchOpen(false);
@@ -170,10 +176,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Center Section - Desktop */}
       <div className="hidden md:flex items-center justify-center flex-1 h-full max-w-[500px] gap-2">
         <button 
-          onClick={() => { onNavigate('home'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/'); closeAllDropdowns(); }}
           className={`px-6 h-12 flex items-center justify-center relative group transition-all duration-300 rounded-2xl ${activePage === 'home' ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
           title="Home"
         >
@@ -181,7 +186,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {activePage === 'home' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-(--brand-primary) rounded-full shadow-lg shadow-blue-500/20" />}
         </button>
         <button 
-          onClick={() => { onNavigate('friends'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/friends'); closeAllDropdowns(); }}
           className={`px-6 h-12 flex items-center justify-center relative group transition-all duration-300 rounded-2xl ${activePage === 'friends' ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
           title="Friends"
         >
@@ -189,7 +194,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {activePage === 'friends' && <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-(--brand-primary) rounded-full shadow-lg shadow-blue-500/20" />}
         </button>
         <button 
-          onClick={() => { onNavigate('video'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/video'); closeAllDropdowns(); }}
           className={`px-6 h-12 flex items-center justify-center relative group transition-all duration-300 rounded-2xl ${activePage === 'video' ? 'text-(--brand-primary) bg-(--brand-primary)/10' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}
           title="Video"
         >
@@ -199,8 +204,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center justify-end gap-3 flex-1">
-        {/* Removed theme toggle from here as per user request */}
+      <div className={`flex items-center justify-end gap-1.5 md:gap-3 ${isSearchOpen ? 'hidden md:flex' : 'flex-1'} min-w-0`}>
+        {/* Mobile Search Toggle */}
+        <button 
+          onClick={() => setIsSearchOpen(true)}
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover) transition-all"
+        >
+          <Search size={20} />
+        </button>
 
         <div className="relative">
           <button 
@@ -219,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="fixed md:absolute top-18 md:top-full left-0 md:left-auto right-0 mt-0 md:mt-3 w-full md:w-85 h-[calc(100vh-72px)] md:h-auto glass-card rounded-none! md:rounded-xl! shadow-2xl border-x-0 md:border-x border-b md:border-t border-(--glass-border) p-5 z-70 animate-fade-in overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-black text-(--text-primary) tracking-tight">Chats</h3>
-                <button onClick={() => { onNavigate('messages'); setIsMessengerOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
+                <button onClick={() => { navigate('/messages'); setIsMessengerOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
               </div>
               <div className="space-y-3">
                 {friends.slice(0, 5).map(friend => (
@@ -358,26 +369,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </div>
 
-        <button 
-          className="md:hidden w-11 h-11 flex items-center justify-center bg-(--bg-input) rounded-xl text-(--text-primary) hover:bg-(--fb-hover) transition-all"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Removed hamburger menu as per user request */}
       </div>
     </nav>
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-card rounded-none! border-t border-(--glass-border) z-50 px-4 flex items-center justify-around backdrop-blur-3xl shadow-2xl">
         <button 
-          onClick={() => { onNavigate('home'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/'); closeAllDropdowns(); }}
           className={`flex flex-col items-center gap-1 transition-all ${activePage === 'home' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
         >
           <Home size={22} fill={activePage === 'home' ? 'currentColor' : 'none'} />
           <span className="text-[10px] font-black uppercase tracking-tighter">Home</span>
         </button>
         <button 
-          onClick={() => { onNavigate('friends'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/friends'); closeAllDropdowns(); }}
           className={`flex flex-col items-center gap-1 transition-all ${activePage === 'friends' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
         >
           <Users size={22} fill={activePage === 'friends' ? 'currentColor' : 'none'} />
@@ -397,7 +403,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-[10px] font-black uppercase tracking-tighter">Messages</span>
         </button>
         <button 
-          onClick={() => { onNavigate('notifications'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/notifications'); closeAllDropdowns(); }}
           className={`flex flex-col items-center gap-1 transition-all ${activePage === 'notifications' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
         >
           <div className="relative">
@@ -411,7 +417,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-[10px] font-black uppercase tracking-tighter">Alerts</span>
         </button>
         <button 
-          onClick={() => { onNavigate('profile'); closeAllDropdowns(); }}
+          onClick={() => { navigate('/profile'); closeAllDropdowns(); }}
           className={`flex flex-col items-center gap-1 transition-all ${activePage === 'profile' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
         >
           <UserIcon size={22} fill={activePage === 'profile' ? 'currentColor' : 'none'} />

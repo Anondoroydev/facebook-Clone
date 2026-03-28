@@ -109,11 +109,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
   };
 
   return (
-    <div className="glass-card mb-6 overflow-hidden text-(--text-primary) border border-(--glass-border) animate-fade-in shadow-xl shadow-black/5">
+    <div className="glass-card mb-2 md:mb-6 overflow-hidden text-(--text-primary) border-y md:border border-(--glass-border) rounded-none md:rounded-[16px] animate-fade-in shadow-sm md:shadow-xl shadow-black/5">
       {/* Header */}
       <div className="p-4 flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={handleAuthorClick} className="flex-shrink-0 hover:opacity-90 transition-opacity">
+        <div className="flex items-center gap-3 min-w-0">
+          <button onClick={handleAuthorClick} className="shrink-0 hover:opacity-90 transition-opacity">
             {post.authorPhoto ? (
               <img src={post.authorPhoto} alt={post.authorName} className="w-10 h-10 rounded-full object-cover border border-(--divider)" />
             ) : (
@@ -122,8 +122,8 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
               </div>
             )}
           </button>
-          <div className="text-left flex flex-col">
-            <button onClick={handleAuthorClick} className="font-black text-(--text-primary) hover:underline text-[15px] leading-tight text-left tracking-tight">
+          <div className="text-left flex flex-col min-w-0">
+            <button onClick={handleAuthorClick} className="font-black text-(--text-primary) hover:underline text-[15px] leading-tight text-left tracking-tight truncate max-w-[160px] sm:max-w-xs block">
               {post.authorName}
             </button>
             <div className="flex items-center gap-1 text-[12px] font-bold text-(--text-secondary) uppercase tracking-tighter">
@@ -175,7 +175,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
       {/* Content */}
       {post.content && (
         <div className="px-4 pb-3">
-          <p className="text-(--text-primary) whitespace-pre-wrap text-[15px] leading-relaxed font-medium">{post.content}</p>
+          <p className="text-(--text-primary) whitespace-pre-wrap break-words text-[15px] leading-relaxed font-medium">{post.content}</p>
         </div>
       )}
 
@@ -257,7 +257,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
             <div className="space-y-4 mb-4">
               {comments.map(comment => (
                 <div key={comment.id} className="flex gap-3">
-                  <button onClick={() => onViewProfile && onViewProfile(comment.authorId)} className="flex-shrink-0 mt-1">
+                  <button onClick={() => onViewProfile && onViewProfile(comment.authorId)} className="shrink-0 mt-1">
                     {comment.authorPhoto ? (
                       <img src={comment.authorPhoto} alt={comment.authorName} className="w-8 h-8 rounded-xl object-cover border border-(--divider)" />
                     ) : (
@@ -266,12 +266,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onViewPro
                       </div>
                     )}
                   </button>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="bg-(--bg-card) rounded-2xl px-3.5 py-2 inline-block max-w-full shadow-sm border border-(--divider)">
-                      <button onClick={() => onViewProfile && onViewProfile(comment.authorId)} className="font-black text-[12px] text-(--text-primary) hover:underline block text-left tracking-tight">
+                      <button onClick={() => onViewProfile && onViewProfile(comment.authorId)} className="font-black text-[12px] text-(--text-primary) hover:underline block text-left tracking-tight truncate max-w-[140px] sm:max-w-[200px]">
                         {comment.authorName}
                       </button>
-                      <p className="text-[14px] text-(--text-primary) leading-snug font-medium">{comment.content}</p>
+                      <p className="text-[14px] text-(--text-primary) leading-snug font-medium break-words">{comment.content}</p>
                     </div>
                     <div className="flex items-center gap-3 mt-1 ml-2 text-[10px] font-bold text-(--text-secondary) uppercase tracking-tighter">
                       <span>{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>

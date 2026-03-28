@@ -66,7 +66,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
   };
 
   return (
-    <div className="glass-card mb-6 overflow-hidden border border-(--glass-border) text-(--text-primary) shadow-xl shadow-black/5 p-2">
+    <div className="glass-card mb-2 md:mb-6 overflow-hidden border-y md:border border-(--glass-border) rounded-none md:rounded-[16px] text-(--text-primary) shadow-sm md:shadow-xl shadow-black/5 p-2">
 
 
 

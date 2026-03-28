@@ -305,7 +305,7 @@ export default function App() {
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-(--bg-main) pt-[72px] pb-[80px] md:pb-8 text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary)">
+    <div className="min-h-screen bg-(--bg-main) pt-[72px] pb-[80px] md:pb-8 text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary) overflow-x-hidden w-full max-w-[100vw]">
 
 
       <Navbar 
@@ -322,7 +322,7 @@ export default function App() {
       />
 
 
-      <main className="w-full max-w-[1920px] mx-auto px-2 md:px-4 xl:px-12 py-4 md:py-8 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
+      <main className="w-full max-w-[1920px] mx-auto px-0 md:px-4 xl:px-12 py-2 md:py-8 grid grid-cols-1 lg:grid-cols-12 gap-0 md:gap-8 overflow-hidden">
         {/* Left Sidebar - Profile & Navigation */}
         <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-3 overflow-y-auto sticky top-24 h-[calc(100vh-120px)] pr-4 scrollbar-hide glass-card bg-(--bg-sidebar)! p-4">
 
@@ -392,12 +392,12 @@ export default function App() {
         </div>
 
         {/* Main Content Area */}
-        <div className="lg:col-span-6 xl:col-span-6 space-y-6 w-full mx-auto">
+        <div className="min-w-0 lg:col-span-6 xl:col-span-6 space-y-3 md:space-y-6 w-full mx-auto">
           {/* ... existing content ... */}
           {activePage === 'home' && (
             <>
               {/* Stories Section */}
-              <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
+              <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide px-2 md:px-0">
                 {/* Create Story Card */}
                 <div 
                   onClick={() => setShowCreateStory(true)}
