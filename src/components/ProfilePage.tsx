@@ -168,6 +168,12 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ user, currentUser, onE
             <div className="w-full h-full bg-linear-to-r from-[#1877F2]/20 to-[#1877F2]/40" />
 
           )}
+
+          {isUploading && (
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-20">
+              <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
           
           {isOwnProfile && (
             <div className="absolute bottom-4 right-4 flex gap-2">

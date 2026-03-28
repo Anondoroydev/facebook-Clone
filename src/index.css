@@ -16,9 +16,10 @@
   --bg-input: rgba(0, 0, 0, 0.04);
   
   --text-primary: #0F172A;
-  --text-secondary: #64748B;
-  --divider: rgba(0, 0, 0, 0.06);
-  --glass-border: rgba(255, 255, 255, 0.4);
+  --text-secondary: #475569; /* Increased contrast from #64748B */
+  --divider: rgba(0, 0, 0, 0.08);
+  --glass-border: rgba(0, 0, 0, 0.08); /* Darker border for light mode */
+  --mobile-nav-height: 64px;
   
   --radius-sm: 8px;
   --radius-md: 16px;
@@ -45,6 +46,7 @@
   --divider: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.08);
   --fb-hover: rgba(255, 255, 255, 0.06);
+  --bg-input: rgba(255, 255, 255, 0.1); /* Slightly brighter for dark mode */
 }
 
 ::selection {

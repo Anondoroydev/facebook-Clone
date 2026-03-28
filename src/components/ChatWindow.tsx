@@ -82,7 +82,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
   };
 
   return (
-    <div className="fixed bottom-0 right-4 w-80 md:w-96 bg-white rounded-t-xl shadow-2xl border border-gray-200 flex flex-col h-[450px] z-60">
+    <div className="fixed bottom-18 md:bottom-0 right-2 md:right-4 w-[calc(100%-16px)] md:w-96 bg-white rounded-xl md:rounded-t-xl md:rounded-b-none shadow-2xl border border-gray-200 flex flex-col h-[500px] md:h-[450px] z-60 animate-in slide-in-from-bottom-4 duration-300">
 
       {/* Header */}
       <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-blue-600 text-white rounded-t-xl">
@@ -107,15 +107,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ currentUser, otherUser, 
         <div className="flex items-center gap-2">
           <button 
             onClick={() => onStartCall?.('audio')}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+            className="p-2 md:p-1.5 hover:bg-white/10 rounded-full transition-colors"
           >
-            <Phone size={18} />
+            <Phone size={20} />
           </button>
           <button 
             onClick={() => onStartCall?.('video')}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+            className="p-2 md:p-1.5 hover:bg-white/10 rounded-full transition-colors"
           >
-            <Video size={18} />
+            <Video size={20} />
           </button>
           <button onClick={onClose} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
             <X size={18} />

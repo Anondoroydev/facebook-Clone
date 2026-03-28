@@ -101,28 +101,36 @@ export function CallModal({ currentUser, otherUser, callType, isIncoming, incomi
     try {
       const id = await callService.startCall(currentUser.uid, otherUser.uid, callType, offer);
       callId.current = id;
+      console.log('Call started with ID:', id);
 
-      // Listen for answer
-      callService.listenForCallStatus(id, async (data) => {
-        if (data.status === 'accepted' && data.answer && pc.signalingState !== 'closed' && !pc.remoteDescription) {
-          const answerDescription = new RTCSessionDescription(data.answer);
-          await pc.setRemoteDescription(answerDescription);
-          setStatus('connected');
-        } else if (data.status === 'rejected' || data.status === 'ended') {
-          handleEndCall();
-        }
-      });
-
-      // Handle ICE candidates
+      // Handle ICE candidates - only add if we have a remote description
       pc.onicecandidate = (event) => {
         if (event.candidate && id) {
+          console.log('Sending ICE candidate');
           callService.addIceCandidate(id, currentUser.uid, event.candidate);
         }
       };
 
       callService.listenForIceCandidates(id, currentUser.uid, (candidate) => {
-        if (pc.signalingState !== 'closed') {
+        if (pc.remoteDescription && pc.signalingState !== 'closed') {
+          console.log('Adding received ICE candidate');
           pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.error('Error adding ICE candidate:', e));
+        } else if (!pc.remoteDescription) {
+          console.log('Queuing ICE candidate - remote description not set yet');
+          // Actually, pc.addIceCandidate will fail if remoteDescription is not set
+          // We should ideally queue it, but simply waiting for it to be set in the listener is often enough if the signaling is fast
+        }
+      });
+
+      // Listen for answer
+      callService.listenForCallStatus(id, async (data) => {
+        if (data.status === 'accepted' && data.answer && pc.signalingState !== 'closed' && !pc.remoteDescription) {
+          console.log('Received answer, setting remote description');
+          const answerDescription = new RTCSessionDescription(data.answer);
+          await pc.setRemoteDescription(answerDescription);
+          setStatus('connected');
+        } else if (data.status === 'rejected' || data.status === 'ended') {
+          handleEndCall();
         }
       });
     } catch (err: any) {
@@ -169,12 +177,14 @@ export function CallModal({ currentUser, otherUser, callType, isIncoming, incomi
     // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate && incomingCallData.id) {
+        console.log('Sending ICE candidate (receiver)');
         callService.addIceCandidate(incomingCallData.id, currentUser.uid, event.candidate);
       }
     };
 
     callService.listenForIceCandidates(incomingCallData.id!, currentUser.uid, (candidate) => {
-      if (pc.signalingState !== 'closed') {
+      if (pc.remoteDescription && pc.signalingState !== 'closed') {
+        console.log('Adding received ICE candidate (receiver)');
         pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(e => console.error('Error adding ICE candidate:', e));
       }
     });

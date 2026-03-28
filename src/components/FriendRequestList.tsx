@@ -106,31 +106,30 @@ const FriendRequestCard: React.FC<{ request: FriendRequest, onRespond: (id: stri
   }
 
   return (
-    <div className="bg-(--fb-card) rounded-xl border border-(--fb-divider)/30 shadow-sm overflow-hidden">
-
-      <div className="aspect-square bg-gray-100">
+    <div className="bg-(--fb-card) rounded-xl border border-(--fb-divider)/30 shadow-sm overflow-hidden flex md:flex-col items-center md:items-stretch gap-4 md:gap-0 p-3 md:p-0">
+      <div className="w-20 md:w-full aspect-square bg-gray-100 rounded-xl md:rounded-none shrink-0 overflow-hidden">
         {sender.photoURL ? (
           <img src={sender.photoURL} alt={sender.displayName} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
-            <UserIcon size={64} />
+            <UserIcon size={32} />
           </div>
         )}
       </div>
-      <div className="p-4">
-        <h4 className="font-bold text-gray-900 truncate">{sender.displayName}</h4>
-        <div className="mt-4 flex flex-col gap-2">
+      <div className="flex-1 min-w-0">
+        <h4 className="font-bold text-[15px] text-gray-900 truncate tracking-tight">{sender.displayName}</h4>
+        <div className="mt-2 flex gap-2">
           <button 
             onClick={() => handleAction('accepted')}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
           >
-            <Check size={18} /> Confirm
+            <Check size={14} /> <span className="uppercase">Confirm</span>
           </button>
           <button 
             onClick={() => handleAction('declined')}
-            className="w-full bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 bg-(--bg-input) text-gray-700 py-2 rounded-lg text-xs font-bold hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"
           >
-            <X size={18} /> Delete
+            <X size={14} /> <span className="uppercase">Delete</span>
           </button>
         </div>
       </div>

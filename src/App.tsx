@@ -305,7 +305,7 @@ export default function App() {
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-(--bg-main) pt-[72px] text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary)">
+    <div className="min-h-screen bg-(--bg-main) pt-[72px] pb-[80px] md:pb-8 text-(--text-primary) transition-colors duration-500 selection:bg-(--brand-primary)/20 selection:text-(--brand-primary)">
 
 
       <Navbar 
@@ -322,9 +322,9 @@ export default function App() {
       />
 
 
-      <main className="w-full max-w-[1920px] mx-auto px-4 xl:px-12 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="w-full max-w-[1920px] mx-auto px-2 md:px-4 xl:px-12 py-4 md:py-8 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
         {/* Left Sidebar - Profile & Navigation */}
-        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-3 overflow-y-auto sticky top-24 h-[calc(100vh-120px)] pr-4 scrollbar-hide glass-card !bg-(--bg-sidebar) p-4">
+        <div className="hidden lg:block lg:col-span-3 xl:col-span-3 space-y-3 overflow-y-auto sticky top-24 h-[calc(100vh-120px)] pr-4 scrollbar-hide glass-card bg-(--bg-sidebar)! p-4">
 
           {/* Profile Link */}
           <button 
@@ -401,7 +401,7 @@ export default function App() {
                 {/* Create Story Card */}
                 <div 
                   onClick={() => setShowCreateStory(true)}
-                  className="flex-shrink-0 w-[140px] h-[240px] glass-card overflow-hidden relative group cursor-pointer border border-(--glass-border) bg-black"
+                  className="shrink-0 w-[140px] h-[240px] glass-card overflow-hidden relative group cursor-pointer border border-(--glass-border) bg-black"
                 >
                   <div className="h-[180px] overflow-hidden flex items-center justify-center bg-black/40">
                     <img src={profile.photoURL || 'https://picsum.photos/seed/user/400/600'} alt="Your Story" className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 ease-out" />
@@ -421,7 +421,7 @@ export default function App() {
                   <div 
                     key={story.id} 
                     onClick={() => setViewingStoryIndex(index)}
-                    className="flex-shrink-0 w-32 h-56 bg-black rounded-2xl overflow-hidden relative group cursor-pointer border border-(--glass-border) shadow-xl shadow-black/20"
+                    className="shrink-0 w-32 h-56 bg-black rounded-2xl overflow-hidden relative group cursor-pointer border border-(--glass-border) shadow-xl shadow-black/20"
                   >
                     {/* Blurred Background */}
                     <div 
@@ -468,7 +468,7 @@ export default function App() {
                 ))}
 
                 {stories.length === 0 && [1, 2, 3].map((i) => (
-                  <div key={i} className="flex-shrink-0 w-[112px] h-[200px] bg-gray-100 rounded-xl shadow-sm border border-[#CED0D4]/30 overflow-hidden relative animate-pulse">
+                  <div key={i} className="shrink-0 w-[112px] h-[200px] bg-gray-100 rounded-xl shadow-sm border border-[#CED0D4]/30 overflow-hidden relative animate-pulse">
                     <div className="w-full h-full bg-gray-200" />
                   </div>
                 ))}
@@ -740,6 +740,8 @@ export default function App() {
             user={profile} 
             onClose={() => setShowEditProfile(false)} 
             onUpdate={(updated) => setProfile(updated)} 
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         )}
 

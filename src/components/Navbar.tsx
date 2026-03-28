@@ -114,7 +114,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-18 glass-card rounded-none! border-b border-(--glass-border) z-50 px-6 flex items-center justify-between backdrop-blur-3xl shadow-xl shadow-black/5 transition-all duration-500">
+    <>
+    <nav className="fixed top-0 left-0 right-0 h-16 md:h-18 glass-card rounded-none! border-b border-(--glass-border) z-50 px-3 md:px-6 flex items-center justify-between backdrop-blur-3xl shadow-xl shadow-black/5 transition-all duration-500">
       
       {/* Left Section */}
       <div className={`flex items-center gap-4 ${isSearchOpen ? 'flex-1' : 'flex-none md:flex-1'}`}>
@@ -127,9 +128,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         )}
         
-        <div ref={searchRef} className="relative w-full max-w-[280px]">
-          <div className={`flex items-center bg-(--bg-input) rounded-2xl px-4 py-2.5 gap-3 w-full ${isSearchOpen ? "flex" : "hidden md:flex"} border border-transparent focus-within:border-(--brand-primary)/30 focus-within:bg-(--bg-card) focus-within:shadow-xl transition-all`}> 
-            {!isSearchOpen && <Search size={22} className="text-(--text-secondary)" />} 
+        <div ref={searchRef} className={`relative flex-1 ${isSearchOpen ? 'w-full' : 'max-w-[280px]'}`}>
+          <div className={`flex items-center bg-(--bg-input) rounded-2xl px-3 md:px-4 py-2 md:py-2.5 gap-2 md:gap-3 w-full ${isSearchOpen ? "flex" : "hidden md:flex"} border border-transparent focus-within:border-(--brand-primary)/30 focus-within:bg-(--bg-card) focus-within:shadow-xl transition-all`}> 
+            {!isSearchOpen && <Search size={20} className="text-(--text-primary) opacity-70" />} 
             <input 
               type="text" 
               placeholder="Search SocialConnect" 
@@ -199,13 +200,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Section */}
       <div className="flex items-center justify-end gap-3 flex-1">
-        <button
-          onClick={onToggleTheme}
-          className="w-11 h-11 flex items-center justify-center rounded-xl bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover) transition-all duration-300"
-          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-        >
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-        </button>
+        {/* Removed theme toggle from here as per user request */}
 
         <div className="relative">
           <button 
@@ -214,14 +209,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               closeAllDropdowns();
               setIsMessengerOpen(newState);
             }}
-            className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 ${isMessengerOpen || activePage === 'messages' ? 'bg-(--brand-primary)/20 text-(--brand-primary)' : 'bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover)'}`}
+            className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all duration-300 ${isMessengerOpen || activePage === 'messages' ? 'bg-(--brand-primary)/20 text-(--brand-primary)' : 'bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover)'}`}
             title="Messenger"
           >
-            <MessageCircle size={22} />
+            <MessageCircle size={20} className={isMessengerOpen || activePage === 'messages' ? 'text-(--brand-primary)' : 'text-(--text-primary)'} />
           </button>
 
           {isMessengerOpen && (
-            <div className="absolute top-full right-0 mt-3 w-85 glass-card shadow-2xl border border-(--glass-border) p-5 z-70 animate-fade-in">
+            <div className="fixed md:absolute top-18 md:top-full left-0 md:left-auto right-0 mt-0 md:mt-3 w-full md:w-85 h-[calc(100vh-72px)] md:h-auto glass-card rounded-none! md:rounded-xl! shadow-2xl border-x-0 md:border-x border-b md:border-t border-(--glass-border) p-5 z-70 animate-fade-in overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-black text-(--text-primary) tracking-tight">Chats</h3>
                 <button onClick={() => { onNavigate('messages'); setIsMessengerOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
@@ -269,19 +264,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               closeAllDropdowns();
               setIsNotificationsOpen(newState);
             }}
-            className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 ${isNotificationsOpen || activePage === 'notifications' ? 'bg-(--brand-primary)/20 text-(--brand-primary)' : 'bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover)'}`}
+            className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all duration-300 ${isNotificationsOpen || activePage === 'notifications' ? 'bg-(--brand-primary)/20 text-(--brand-primary)' : 'bg-(--bg-input) text-(--text-primary) hover:bg-(--fb-hover)'}`}
             title="Notifications"
           >
-            <Bell size={22} />
+            <Bell size={20} className={isNotificationsOpen || activePage === 'notifications' ? 'text-(--brand-primary)' : 'text-(--text-primary)'} />
             {unreadNotifications > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-(--bg-card) font-black shadow-lg">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4.5 h-4.5 flex items-center justify-center rounded-full border-2 border-(--bg-card) font-black shadow-lg">
                 {unreadNotifications}
               </span>
             )}
           </button>
 
           {isNotificationsOpen && (
-            <div className="absolute top-full right-0 mt-3 w-85 glass-card shadow-2xl border border-(--glass-border) p-5 z-70 animate-fade-in">
+            <div className="fixed md:absolute top-18 md:top-full left-0 md:left-auto right-0 mt-0 md:mt-3 w-full md:w-85 h-[calc(100vh-72px)] md:h-auto glass-card rounded-none! md:rounded-xl! shadow-2xl border-x-0 md:border-x border-b md:border-t border-(--glass-border) p-5 z-70 animate-fade-in overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-black text-(--text-primary) tracking-tight">Alerts</h3>
                 <button onClick={() => { onNavigate('notifications'); setIsNotificationsOpen(false); }} className="text-(--brand-primary) text-sm font-bold hover:underline">See all</button>
@@ -301,10 +296,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-1 hover:scale-105 active:scale-95 transition-all duration-300"
           >
             {user?.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className="w-11 h-11 rounded-2xl object-cover border-2 border-(--brand-primary)/20 shadow-lg shadow-black/5" />
+              <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 md:w-11 md:h-11 rounded-2xl object-cover border-2 border-(--brand-primary)/20 shadow-lg shadow-black/5" />
             ) : (
-              <div className="w-11 h-11 rounded-2xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary) border-2 border-(--brand-primary)/20 shadow-lg shadow-black/5">
-                <UserIcon size={22} />
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-(--brand-primary)/10 flex items-center justify-center text-(--brand-primary) border-2 border-(--brand-primary)/20 shadow-lg shadow-black/5">
+                <UserIcon size={20} />
               </div>
             )}
           </button>
@@ -329,6 +324,26 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               
               <div className="h-px bg-(--divider)/30 my-3 mx-2" />
+
+              <div className="px-3 pb-2">
+                <p className="text-[10px] font-black uppercase text-(--text-secondary) mb-2 ml-1 tracking-widest">Appearance</p>
+                <button 
+                  onClick={() => { onToggleTheme(); }}
+                  className="w-full flex items-center justify-between p-3 hover:bg-(--fb-hover) rounded-2xl transition-all duration-300 group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-(--bg-input) rounded-xl flex items-center justify-center group-hover:bg-(--brand-primary)/10 transition-colors">
+                      {theme === 'light' ? <Moon size={22} className="text-(--text-primary)" /> : <Sun size={22} className="text-(--text-primary)" />}
+                    </div>
+                    <span className="font-bold text-[15px]">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                  </div>
+                  <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${theme === 'dark' ? 'bg-(--brand-primary)' : 'bg-(--divider)'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-0'}`} />
+                  </div>
+                </button>
+              </div>
+              
+              <div className="h-px bg-(--divider)/30 my-3 mx-2" />
               
               <button 
                 onClick={handleLogout}
@@ -350,18 +365,59 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="absolute top-full left-0 right-0 glass-card mx-6 mt-3 p-4 flex flex-col gap-2 shadow-2xl animate-in slide-in-from-top-4 duration-300 md:hidden z-60">
-          <button onClick={() => { onNavigate('home'); setIsMenuOpen(false); }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${activePage === 'home' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
-            <Home size={24} /> <span className="font-bold">Home</span>
-          </button>
-          <button onClick={() => { onNavigate('friends'); setIsMenuOpen(false); }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${activePage === 'friends' ? 'bg-(--brand-primary)/10 text-(--brand-primary)' : 'text-(--text-secondary) hover:bg-(--fb-hover)'}`}>
-            <Users size={24} /> <span className="font-bold">Friends</span>
-          </button>
-        </div>
-      )}
     </nav>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-card rounded-none! border-t border-(--glass-border) z-50 px-4 flex items-center justify-around backdrop-blur-3xl shadow-2xl">
+        <button 
+          onClick={() => { onNavigate('home'); closeAllDropdowns(); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activePage === 'home' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
+        >
+          <Home size={22} fill={activePage === 'home' ? 'currentColor' : 'none'} />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Home</span>
+        </button>
+        <button 
+          onClick={() => { onNavigate('friends'); closeAllDropdowns(); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activePage === 'friends' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
+        >
+          <Users size={22} fill={activePage === 'friends' ? 'currentColor' : 'none'} />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Friends</span>
+        </button>
+        <button 
+          onClick={() => {
+            const newState = !isMessengerOpen;
+            closeAllDropdowns();
+            setIsMessengerOpen(newState);
+          }}
+          className={`flex flex-col items-center gap-1 transition-all ${isMessengerOpen || activePage === 'messages' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
+        >
+          <div className="relative">
+            <MessageCircle size={22} fill={isMessengerOpen || activePage === 'messages' ? 'currentColor' : 'none'} />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Messages</span>
+        </button>
+        <button 
+          onClick={() => { onNavigate('notifications'); closeAllDropdowns(); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activePage === 'notifications' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
+        >
+          <div className="relative">
+            <Bell size={22} fill={activePage === 'notifications' ? 'currentColor' : 'none'} />
+            {unreadNotifications > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-3.5 h-3.5 flex items-center justify-center rounded-full border border-(--bg-card) font-black">
+                {unreadNotifications}
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Alerts</span>
+        </button>
+        <button 
+          onClick={() => { onNavigate('profile'); closeAllDropdowns(); }}
+          className={`flex flex-col items-center gap-1 transition-all ${activePage === 'profile' ? 'text-(--brand-primary)' : 'text-(--text-secondary)'}`}
+        >
+          <UserIcon size={22} fill={activePage === 'profile' ? 'currentColor' : 'none'} />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Profile</span>
+        </button>
+      </div>
+    </>
   );
 };
