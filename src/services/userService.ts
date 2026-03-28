@@ -109,9 +109,16 @@ export const userService = {
   },
 
   searchUsers: async (searchTerm: string) => {
-    const q = query(collection(db, 'users'), where('displayName', '>=', searchTerm), where('displayName', '<=', searchTerm + '\uf8ff'));
+    // Using a client-side filter for case-insensitive search since 
+    // Firestore native queries are strictly case-sensitive
+    const q = query(collection(db, 'users'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as UserProfile);
+    const term = searchTerm.toLowerCase();
+    
+    return snapshot.docs
+      .map(doc => doc.data() as UserProfile)
+      .filter(user => user.displayName?.toLowerCase().includes(term))
+      .slice(0, 20); // Limit to 20 results
   },
 
   updateProfile: async (userId: string, data: Partial<UserProfile>) => {
